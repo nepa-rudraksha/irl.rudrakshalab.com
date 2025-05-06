@@ -1,0 +1,68 @@
+
+//services
+
+.services
+    &__item
+        background: #fff
+        box-shadow: 0 6px 40px rgba($accent, 0.12)
+        font-family: 'Poppins', sans-serif
+        font-size: 0.875rem
+        transition: box-shadow 0.3s ease
+        border-radius: 20px
+        margin-bottom: 30px
+
+        @media screen and (max-width: 767px)
+            box-shadow: 0 6px20px rgba($accent, 0.8)
+            margin-bottom: 20px
+
+        &:hover
+            box-shadow: 0 6px 40px rgba($accent, 0.25)
+
+    &__img
+        border-radius: 20px
+        overflow: hidden
+        margin-bottom: 0
+
+    &__content
+        padding: 24px
+        font-size: 14px
+
+.services__item--hover
+    overflow: hidden
+
+.services__item--hover figure
+    transition: all 0.6s ease-in
+
+.services__item--hover:hover
+    background: $primary
+
+.services__item--hover:hover figure
+    color: #fff
+    animation-name: slideUp
+    animation-duration: .6s
+    background: #fff
+
+.services__item--hover:hover .services__content
+    animation-name: slideUp
+    animation-duration: .6s
+    color: #fff
+
+.services__item--hover:hover h3
+    color: #fff
+
+@keyframes slideUp
+    0%
+        transform: translateY(100%)
+
+    100%
+        transform: translateY(0)
+
+@keyframes slideDown
+    0%
+        transform: translateY(-100%)
+
+    100%
+        transform: translateY(0)
+
+.feature-services__list .card
+    margin-bottom: 30px

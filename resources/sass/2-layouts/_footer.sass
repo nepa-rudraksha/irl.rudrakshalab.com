@@ -1,0 +1,99 @@
+
+.footer
+    padding: 40px 0
+    color: rgba(#fff, 0.9)
+    font-size: 0.9375rem
+    position: relative
+    background: $primary
+
+    .container
+        position: relative
+        z-index: 100
+    h3
+        color: #fff
+        padding-bottom: 10px
+        border-block-end: 1px solid #fff
+        margin-bottom: 30px
+        position: relative
+
+        &::before
+            content: ''
+            position: absolute
+            left: 0
+            bottom: 0
+            width: 100px
+            height: 1px
+            background: #fff
+
+    a
+        color: rgba(#fff, 8)
+
+.footer-links a:hover
+    color: #eeba0b
+    text-decoration: underline
+
+.footer__social-media
+    font-size: 30px
+    margin-top: 20px
+
+    a
+        color: #fff
+
+    i
+        margin-right: 5px
+
+.footer-contact ul li
+    margin-bottom: 10px
+
+.footer-links ul li
+    margin-bottom: 10px
+
+.footer-contact-info p
+    padding-left: 25px
+    position: relative
+
+.footer-contact-info p::after
+    content: ''
+    font-family: "Font Awesome 5 Free"
+    position: absolute
+    left: 0
+    top: 0
+    font-weight: 600
+    color: #eeba0b
+
+p.location::after
+    content: '\f3c5'
+
+p.email::after
+    content: '\f0e0'
+
+p.phone::after
+    content: '\f879'
+
+p.time::after
+    content: '\f017'
+
+.footer-bottom
+    margin-top: 30px
+    padding-top: 20px
+    border-top: 1px solid #15924F
+
+.designby
+    text-align: right
+
+    a
+        color: #eeba0b
+
+        &:hover
+            text-decoration: underline
+
+@media screen and (max-width: 767px)
+    .designby
+        text-align: left
+
+    .footer-links,
+    .footer-contact
+        margin-top: 20px
+
+.footer-links ul
+    column-count: 2

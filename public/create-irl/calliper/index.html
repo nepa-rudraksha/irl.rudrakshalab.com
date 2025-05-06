@@ -1,0 +1,276 @@
+<html>
+  <head></head>
+  <body data-new-gr-c-s-check-loaded="14.1093.0" data-gr-ext-installed="">
+    <div id="caliper">
+      <div id="main-scale">
+        
+      </div>
+      <img id="vernier-scale" src="head.png" />
+      <div class="moveable-jaw">
+        <img id="jaw" style="left: 0%; cursor: col-resize" src="jam.png" />
+        <div id="output"></div>
+        <div id="output2"></div>
+      </div>
+      <input type="text" id="measurement" />
+    </div>
+
+    <style>
+
+      *{
+            user-drag: none;
+        -webkit-user-drag: none;
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+      }
+      #caliper {
+        max-width: 150px;
+        min-width:150px;
+        height: 70px;
+        position: relative;
+        background-color: #ccc;
+        /* margin-top: 50px; */
+        user-select: none;
+      }
+
+      #main-scale {
+    width: 100%;
+    height: 20.5%;
+    position: absolute;
+    top: 27.2%;
+    background: url(scale1.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+      }
+
+      #vernier-scale {
+        height: 100%;
+        position: absolute;
+        z-index: 999;
+      }
+
+      #jaw {
+        height: 100%;
+        position: absolute;
+        bottom: 0;    
+      }
+
+      .moveable-jaw {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        bottom: 0;
+      }
+
+      .scale-tick {
+        position: absolute;
+        bottom: 10px;
+        font-size: 12px;
+        color: transparent;
+        text-align: center;
+      }
+
+      .scale-tick::before {
+        position: absolute;
+        height: 10px;
+        bottom: -10px;
+        width: 1px;
+        content: '';
+        background: transparent;
+      }
+
+      .scale-line {
+        position: absolute;
+        bottom: 2px;
+        width: 1px;
+        height: 5px;
+        background-color: transparent;
+      }
+
+      #caliper input {
+        position: absolute;
+        bottom: -20px;
+        width: 80%;
+      }
+
+      div#output {
+        position: absolute;
+    top: 31%;
+    height: 18.5%;
+    /* transform: translateY(-50%); */
+    width: 44.44%;
+    z-index: 99999999;
+}
+
+body{
+  width: 80px;
+}
+
+
+    </style>
+    <script>
+      var caliper = document.getElementById('caliper')
+      var jaw = document.getElementById('jaw')
+      var input = document.getElementById('measurement')
+      jaw.style.left = '0'
+
+      var jawLeft = 0
+      var mouseX = 0
+
+      jaw.addEventListener('mousedown', function (event) {
+        if (event.button == 0) {
+          jawLeft = parseInt(jaw.style.left)
+          mouseX = event.clientX
+          jaw.style.cursor = 'col-resize'
+          caliper.addEventListener('mousemove', handleMouseMove)
+        }
+      })
+
+      jaw.addEventListener('mouseup', function (event) {
+        jaw.style.cursor = 'default'
+        caliper.removeEventListener('mousemove', handleMouseMove)
+      })
+
+      function handleMouseMove(event) {
+        if (event.buttons == 1) {
+          var newLeft = jawLeft + (event.clientX - mouseX)
+          if (newLeft >= 55) {
+            newLeft = 55
+          }
+          if (newLeft <= 0) {
+            newLeft = 0
+          }
+          if (newLeft >= 0) {
+            // jaw.style.left = newLeft / 1.42 + '%'
+            jaw.style.left = newLeft/1.49  + '%'
+            
+          }
+          input.value = newLeft
+          displayNum(newLeft);
+        }
+      }
+
+      input.addEventListener('change', function () {
+        var value = this.value
+        // here you can define your own conversion from input to pixels
+        // jaw.style.left = value / 1.42 + '%'
+        jaw.style.left = value / 1.49 + '%'
+        displayNum(value);
+      }
+
+)
+
+     const displayNum = (value)=>{
+      
+      var parent = document.getElementById("output");
+      var parent2 = document.getElementById("output2");
+      while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+      }
+      var count=0;
+      var numberString = value.toString();
+      var inputArray = numberString.split('');
+      for (var i = 0; i < inputArray.length; i++) {
+        if (inputArray[i] === '.') {
+          var count=1; 
+        }        
+      }
+
+
+      if(count){
+        var numbers= numberString.split('.');
+        if(numbers[0]){
+          var number =numbers[0];
+        }else{
+          number='0';
+          
+        }
+        var decimal= numbers[1];
+      }else{
+        var numbers = value.toString();
+        var number =numbers;
+        var decimal= '00';
+      }
+      
+      var numberArray = number.split('');
+      if(decimal.split('').length==1){
+        decimal = decimal+"0";
+      }
+      var decimalArray = decimal.split('');
+      console.log(numbers)
+      
+      const convertNumber =(digit)=>{
+        img.style.height = '85%';
+        img.style.display = 'inline-block';
+        // img.style.marginRight = '2px';
+        
+        if (digit[i] === '1') {
+          img.setAttribute('src','1.png') ;
+        } else if (digit[i] === '2') {
+          img.setAttribute('src','2.png') ;
+        } else if (digit[i] === '3') {
+          img.setAttribute('src','3.png') ;
+        } else if (digit[i] === '4') {
+          img.setAttribute('src','4.png') ;
+        } else if (digit[i] === '5') {
+          img.setAttribute('src','5.png') ;
+        } else if (digit[i] === '6') {
+          img.setAttribute('src','6.png') ;
+        } else if (digit[i] === '7') {
+          img.setAttribute('src','7.png') ;
+        } else if (digit[i] === '8') {
+          img.setAttribute('src','8.png') ;
+        } else if (digit[i] === '9') {
+          img.setAttribute('src','9.png') ;
+        } else if (digit[i] === '0') {
+          img.setAttribute('src','0.png') ;
+        }
+        
+      }
+
+      for (var i = 0; i < numberArray.length; i++) {
+        
+        var img = document.createElement('img');
+        convertNumber(numberArray);
+        parent.appendChild(img);
+        
+      }
+
+      for (var i = 0; i < decimalArray.length; i++) {
+        
+        var img = document.createElement('img');
+        convertNumber(decimalArray);
+        parent.appendChild(img);
+        
+      }
+
+
+      
+      parent.style.left =value / 1.49 + 12.5  + '%'
+      parent2.style.left =value / 1.49 + 4  + '%'
+
+      if(numberArray.length<=1){
+        parent.style.paddingLeft ="10%";
+      }
+      if(numberArray.length>1){
+        parent.style.paddingLeft ="6.5%";
+      }
+       
+
+      
+     }
+
+      // Attach a mousemove event listener to the jaw
+      // jaw.addEventListener("mousemove", function(event) {
+      //     if (event.buttons == 1) {
+      //         var newLeft = jawLeft + (event.clientX - mouseX);
+      //         if(newLeft >=0){
+      //             jaw.style.left = newLeft + "px";
+      //             input.value = newLeft; // update the value of input field
+      //         }
+      //     }
+      // });
+    </script>
+  </body>
+</html>

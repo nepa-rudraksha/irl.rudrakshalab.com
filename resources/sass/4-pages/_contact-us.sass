@@ -1,0 +1,88 @@
+
+.contact-text
+    font-size: 0.875rem
+    margin-bottom: 20px
+    line-height: 26px
+
+.contact-form
+    label
+        display: block
+    input
+        height: 40px
+        padding-left: 10px
+        border: 1px solid #E0E0E0
+        border-radius: 0
+        border-radius: 4px
+
+    textarea
+        border: 1px solid #E0E0E0
+        width: 100%
+        padding-left: 10px
+        padding-top: 5px
+        height: 110px
+        border-radius: 4px
+
+    .btn
+        text-transform: uppercase
+
+.contact-box
+    padding-right: 40px
+    @media screen and (max-width: 767px)
+        padding-right: 0
+
+.contact-box button[type="submit"]
+    height: 40px
+    border-radius: 4px
+//contact-icons
+
+.contact-icons
+    padding-left: 40px
+    border-left: 1px solid $border
+    @media screen and (max-width: 767px)
+        padding-left: 0
+        border: 0
+        margin-top: 30px
+
+    .media + .media
+        margin-top: 30px
+
+.contact-icon
+    i
+        height: 56px
+        width: 56px
+        border-radius: 100%
+        -webkit-border-radius: 100%
+        background: $primary
+        font-size: 1.5rem
+        +center
+        margin: 0 auto
+        margin-bottom: 30px
+        color: #fff
+
+.form-control:focus
+    color: #495057
+    background-color: #fff
+    border-color: $primary
+    outline: 0
+    box-shadow: 0 !important
+    box-shadow: none
+
+@media screen and (max-width: 767px)
+    .map-wrap
+        margin-top: 40px
+
+.wpcf7-form.init label
+    display: block
+
+.wpcf7-form.init textarea
+    color: #495057
+    border: 1px solid #ced4da
+    width: 100%
+
+    &:focus
+        color: #495057
+        background-color: #fff
+        border-color: #80bdff
+        outline: 0
+        box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%)
+        padding-left: 10px

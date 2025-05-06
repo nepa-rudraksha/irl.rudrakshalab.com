@@ -1,0 +1,142 @@
+.slider .container-fluid
+    padding: 0
+    background: url('../images/slider-content-bg.jpg') no-repeat left top
+
+.slider .item
+    position: relative
+
+.slider__owl-carousel,
+.slider__owl-carousel .item
+    position: relative
+
+.slider__owl-carousel .owl-item img
+    height: 560px
+    object-fit: cover
+    width: 100%
+
+.slider-content
+    position: absolute
+    left: 50%
+    top: 50%
+    width: 60%
+    transform: translate(-50%, -50%)
+    z-index: 100
+
+.slider-content h2
+    font-size: 42px
+    line-height: 1.1
+
+.slider__subtitile
+    font-size: 1rem
+    font-weight: bold
+
+.slider__owl-carousel  .owl-prev
+    left: 40px
+
+.slider__owl-carousel  .owl-next
+    right: 40px
+
+.slider__owl-carousel  .owl-nav [class*=owl-]
+    background: $accent !important
+
+.owl-prev span,
+.owl-next span
+    font-size: 36px
+
+.owl-prev,
+.owl-next
+    position: absolute
+    top: calc(50% - 40px)
+
+.owl-prev
+    left: -20px
+
+.owl-next
+    right: -20px
+
+.owl-prev:hover,
+.owl-next:hover
+    background: none !important
+
+.owl-carousel.owl-drag .owl-item + .owl-item
+    margin-right: 20px !important
+
+.owl-carousel.owl-drag .owl-item:last-child
+    margin-right: 0 !important
+
+.owl-theme .owl-nav [class*=owl-]
+    border-radius: 100% !important
+    height: 40px
+    width: 40px
+    +center
+    background: $accent !important
+    margin: 0
+
+.owl-theme .owl-nav [class*=owl-] span
+    opacity: 1 !important
+    height: 40px
+    margin-top: -6px
+    color: #fff
+    +center
+
+.owl-theme .owl-nav
+    margin-top: 0 !important
+
+.slider__owl-carousel .owl-nav [class*=owl-]
+    background: #000 !important
+
+.slider__owl-carousel  .owl-nav [class*=owl-]
+    height: 50px
+    width: 50px
+
+@media (min-width: 768px) and (max-width: 992px)
+    .slider__owl-carousel .owl-item img
+        height: 500px
+        object-fit: cover
+
+@media (min-width: 768px) and (max-width: 1200px)
+    .slider-content h2
+        font-size: 42px
+        line-height: 1.2
+        font-weight: 800
+
+    .slider-text
+        font-size: 16px
+
+@media screen and (max-width: 767px)
+    .slider__owl-carousel .owl-item img
+        height: 180px
+        object-fit: cover
+
+    .slider-content h2
+        font-size: 18px
+        line-height: 1.2
+
+    .slider-text
+        font-size: 8px
+
+    .slider-content .btn
+        font-size: 8px
+
+    .slider.p-t-20
+        padding-top: 0
+
+    .owl-theme .owl-nav [class*=owl-]
+        height: 30px
+        width: 30px
+
+    .owl-next
+        right: 0
+
+    .owl-prev
+        left: 0
+
+    .owl-prev span, .owl-next span
+        font-size: 23px
+        top: 2px
+        position: relative
+
+    .owl-prev,
+    .owl-next
+        position: absolute
+        top: calc(50% - 10px)

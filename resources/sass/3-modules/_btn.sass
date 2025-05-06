@@ -1,0 +1,68 @@
+/* #btn================================================== */
+
+.btn
+  padding: 0 0.9375rem
+  line-height: 32px
+  display: inline-block
+  border-radius: 0
+  border: none
+  font-weight: 500
+  font-size: 0.8125rem
+  color: #fff
+  font-weight: 600
+
+.btn--primary
+  background: $primary
+  color: #fff
+
+  &:hover
+    color: #fff
+    background: lighten( $primary, 5%)
+
+.btn--accent
+  background: $accent
+
+  &:hover
+    color: #fff
+    background: lighten( $accent, 5%)
+
+.btn--accent-outline
+  border: 2px solid $accent
+  color: $accent
+  border-radius: 30px
+
+  &:hover
+    border: 2px solid $accent
+    color: #fff
+    background: $accent
+    border-radius: 3pxs
+
+.btn-white--outline
+  border: 2px solid #fff
+  color: #fff
+
+  &:hover
+    border: 2px solid#fff
+    color: #333
+    background: #fff
+
+/*btn size*/
+.btn--small
+  padding: 0 1.25em
+
+.btn--medium
+  padding: 0 1.56em
+  line-height: 1.8
+
+.btn--large
+  padding: 0 2rem
+  height: 50px
+  line-height: 50px
+
+.btn:focus,
+button:focus
+  outline: 0
+
+.btn-link
+  text-decoration: underline
+  color: $accent

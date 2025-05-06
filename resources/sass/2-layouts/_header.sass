@@ -1,0 +1,143 @@
+
+/*Header*/
+
+.header
+    background: $primary
+
+    &__top
+        background: #F2F2F2
+        height: 40px
+        font-size: 0.8125rem
+        line-height: 40px
+
+        @media screen and (max-width: 767px)
+            height: auto
+
+    &__middle
+        padding: 1rem 0
+        color: #fff
+
+.logo
+    +flex
+    color: #fff
+    font-size: 2.625rem
+    font-weight: $headings-font-weight
+    font-family: $headings-font-family-1
+
+    &:hover
+        color: #fff
+    img
+        width: 100px
+        margin-right: 1rem
+
+.registration
+    +flex
+    align-items: center
+    font-size: 14px
+
+    img
+        width: 1rem
+        margin-right: 0.5rem
+
+//navigation 
+.navigation
+    margin-top: 1rem
+    a
+        color: #fff
+        font-size: 14px
+
+        @media screen and (min-width: 767px)
+            &:hover
+                text-decoration: underline !important
+    li + li
+        margin-left: 1rem
+
+
+
+    .btn-nav
+        background: #934b00
+        &:hover
+            text-decoration: none !important
+            color: #fff
+            background: #b35c00
+
+        @media screen and (max-width: 767px)
+            line-height: inherit !important
+
+.report-form input
+    height: 50px
+    @media screen and (max-width: 767px)
+        &
+            margin-top: 1rem
+
+@media screen and (min-width: 767px)
+    .report-form .form-inner
+        +flex
+
+    .report-form input + input
+        margin-left: 1rem
+
+    .report-form button
+        margin-left: 1rem
+
+.fa-info-circle--custom
+    margin-right: 0.5rem
+
+.text-style-italic
+    font-style: italic
+
+.announcement
+    &__text
+        font-weight: bold
+
+.form-inner .form-control
+    border-radius: 0
+
+.form-inner .form-control:focus
+    box-shadow: none
+    border-color: $primary !important
+
+.tests--bg
+    background: #f9f6e8
+
+.tests .card
+    background: none
+
+.copyright
+    font-size: 14px
+    text-align: center
+    margin-top: 30px
+    background: $primary
+    padding: 20px 0
+    color: #fff
+
+.logo-text
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2)
+    -webkit-text-shadow: 0 1px 1px rgba(0,0,0,0.2)
+
+.iso
+    font-size: 1rem
+    margin-top: -0.5rem
+
+.table--report td, .table--report th
+    padding: 0.35rem
+    font-size: 0.875rem
+
+
+.qr-code
+    svg
+        height: 100px
+        width: 100px
+        margin-bottom: 0.5rem  
+
+        @media screen and (max-width: 767px)
+            height: 60px
+            width: 60px
+            
+.qr-head
+    flex: 1
+    display: flex
+    -webkit-display: flex
+    align-items: center
+    flex-direction: column
+    justify-content: center

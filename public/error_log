@@ -1,0 +1,7 @@
+[13-Jan-2025 10:44:26 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\OrderController::$irlQrService in /home/neparud1/irl.rudrakshalab.com/app/Http/Controllers/OrderController.php on line 14
+[13-Jan-2025 10:44:30 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\OrderController::$irlQrService in /home/neparud1/irl.rudrakshalab.com/app/Http/Controllers/OrderController.php on line 14
+[13-Jan-2025 10:46:40 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\OrderController::$irlQrService in /home/neparud1/irl.rudrakshalab.com/app/Http/Controllers/OrderController.php on line 14
+[13-Jan-2025 10:46:46 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\OrderController::$irlQrService in /home/neparud1/irl.rudrakshalab.com/app/Http/Controllers/OrderController.php on line 14
+[13-Jan-2025 11:01:56 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\OrderController::$irlQrService in /home/neparud1/irl.rudrakshalab.com/app/Http/Controllers/OrderController.php on line 14
+[13-Jan-2025 11:02:02 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\OrderController::$irlQrService in /home/neparud1/irl.rudrakshalab.com/app/Http/Controllers/OrderController.php on line 14
+[13-Jan-2025 11:06:27 UTC] PHP Fatal error:  Cannot redeclare App\Http\Controllers\OrderController::$irlQrService in /home/neparud1/irl.rudrakshalab.com/app/Http/Controllers/OrderController.php on line 14
