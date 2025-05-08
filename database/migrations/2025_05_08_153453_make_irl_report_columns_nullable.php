@@ -24,8 +24,8 @@ class MakeIrlReportColumnsNullable extends Migration
             $table->string('name')->nullable(false)->change();
             $table->string('email')->nullable(false)->change();
             $table->string('phone')->nullable(false)->change();
-            $table->unsignedBigInteger('user_id')->nullable(false)->change();
-            $table->unsignedBigInteger('created_by')->nullable(false)->change();
+            $table->unsignedBigInteger('user_id')->nullable()->change();
+            $table->string('created_by')->nullable(false)->change();
         });
     }
 }
