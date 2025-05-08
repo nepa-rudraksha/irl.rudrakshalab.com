@@ -32,6 +32,7 @@ Route::group(['middleware' => ProtectAgainstSpam::class ], function () {
     Route::POST('/generate-report', [FrontController::class, 'getIrlReport'])->name('irl-report');
     Route::get('/validate-report/{referenceNo}/user/{emailPhone}', [FrontController::class, 'validateIrlReport'])->name('irl-report.validate');
     Route::get('/validate-report/{encryptedUrl}', [FrontController::class, 'validateIrlReportEncrypted'])->name('irl-report.validate.encrypted');
+    Route::get('/validate-inventory-report/{encryptedUrl}', [FrontController::class, 'validateIrlReportInventoryEncrypted'])->name('irl-report.validate.inventory.encrypted');
     Route::POST('/contact-us', [FrontController::class, 'postContactForm'])->name('irl-report');
 });
 

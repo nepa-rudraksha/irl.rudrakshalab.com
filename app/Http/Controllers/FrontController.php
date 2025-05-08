@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
+use Illuminate\Encryption\Encrypter;
 
 class FrontController extends Controller
 {
@@ -84,6 +85,38 @@ class FrontController extends Controller
             return view('web.report', compact('irlReport'));
         } catch (DecryptException $e) {
             return abort('403');
+        }
+    }
+
+    public function validateIrlReportInventoryEncrypted(Request $request, $encryptedUrl)
+    {
+        try {
+            // Use your custom base64 key (store it in .env as base64:YOURKEYHERE)
+            $base64Key = env('CUSTOM_KEY'); // e.g., base64:nP1h1C3MgFbKcZRLulAc13RnykZheLp1qq9kOZ5Shfg=
+            $key = base64_decode(explode(':', $base64Key)[1]); // decode from base64
+
+            $cipher = 'AES-256-CBC';
+            $encrypter = new Encrypter($key, $cipher);
+
+            // Decrypt the URL
+            $decrypted = $encrypter->decrypt($encryptedUrl);
+
+            // Split into referenceNo and skuNumber
+            [$referenceNo, $skuNumber] = explode('|', $decrypted);
+
+            // Fetch the IRL Report
+            $irlReport = IrlReport::where('reference_no', $referenceNo)
+                ->where('SKU_no', $skuNumber)
+                ->where('status', IrlReport::PUBLISHED)
+                ->first();
+            if (!$irlReport) {
+                abort(404);
+            }
+    
+            return view('web.report', compact('irlReport'));
+    
+        } catch (DecryptException $e) {
+            return abort(403);
         }
     }
 
