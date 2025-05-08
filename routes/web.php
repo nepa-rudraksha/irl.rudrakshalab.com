@@ -27,7 +27,6 @@ Route::get('/contact-us',[IRLValidationController::class, 'contact'])->name('web
 Route::view('/validate-report/', 'web.validateform');
 Route::get('/information',[IRLValidationController::class, 'information'])->name('web.information');
 
-
 Route::group(['middleware' => ProtectAgainstSpam::class ], function () {
     Route::POST('/generate-report', [FrontController::class, 'getIrlReport'])->name('irl-report');
     Route::get('/validate-report/{referenceNo}/user/{emailPhone}', [FrontController::class, 'validateIrlReport'])->name('irl-report.validate');
