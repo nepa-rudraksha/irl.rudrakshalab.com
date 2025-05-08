@@ -21,7 +21,7 @@ class IRLValidationController extends Controller
     public function information(){
         return view('web/information');
     }
-    public function inf(){
+    public function info(){
         echo phpinfo();
     }
 }
