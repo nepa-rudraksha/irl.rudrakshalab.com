@@ -102,9 +102,6 @@ class OrderController extends Controller
             [
 
                 'message' => 'Order created successfully!',
-
-                'img'=>$img,
-
                 'reference_no'=>'20302139002',
 
             ]
