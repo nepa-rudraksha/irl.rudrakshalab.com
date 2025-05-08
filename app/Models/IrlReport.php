@@ -31,6 +31,7 @@ class IrlReport extends Model
      * @var array
      */
     protected $fillable = [
+        'SKU_no',
         'name',
         'email',
         'qr_code',
