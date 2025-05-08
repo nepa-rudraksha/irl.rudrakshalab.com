@@ -92,24 +92,23 @@ class FrontController extends Controller
     {
         try {
             // Use your custom base64 key (store it in .env as base64:YOURKEYHERE)
-            $base64Key = env('l1F++HBDxN7pMViR8DIUsn9P9vwdFdFXzgk2hRPP4wM='); // e.g., base64:nP1h1C3MgFbKcZRLulAc13RnykZheLp1qq9kOZ5Shfg=
+            $base64Key = env('CUSTOM_KEY'); // e.g., base64:nP1h1C3MgFbKcZRLulAc13RnykZheLp1qq9kOZ5Shfg=
             $key = base64_decode(explode(':', $base64Key)[1]); // decode from base64
-    
+
             $cipher = 'AES-256-CBC';
             $encrypter = new Encrypter($key, $cipher);
-    
+
             // Decrypt the URL
             $decrypted = $encrypter->decrypt($encryptedUrl);
-    
+
             // Split into referenceNo and skuNumber
             [$referenceNo, $skuNumber] = explode('|', $decrypted);
-    
+
             // Fetch the IRL Report
             $irlReport = IrlReport::where('reference_no', $referenceNo)
                 ->where('SKU_no', $skuNumber)
                 ->where('status', IrlReport::PUBLISHED)
                 ->first();
-    
             if (!$irlReport) {
                 abort(404);
             }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\IrlReport;
 use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Log;
 
 class IrlReportController extends Controller
 {
@@ -21,7 +22,7 @@ class IrlReportController extends Controller
     public function download(Request $request, $referenceNo, $emailPhone)
     {
         // $img = QrCode::size(2000)->format('png')->generate(url("report/" .  $referenceNo));
-
+        Log::info('Email or SKU used for encryption:', ['identifier' => $emailPhone]);
         $img = QrCode::size(2000)->format('png')->generate(IrlReport::generateURL($referenceNo, $emailPhone));
 
         return response($img)

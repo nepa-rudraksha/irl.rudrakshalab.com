@@ -64,15 +64,25 @@ class CreateIrlReport extends Component
 
 
 
-        $reference_no = $this->irlReport['reference_no'];
+$reference_no = $this->irlReport['reference_no'];
 
-        $email_phone = isset($this->irlReport['email']) ? $this->irlReport['email'] : $this->irlReport['phone'];
-        $img = base64_encode(QrCode::size(200)->format('png')->generate(IrlReport::generateURL($reference_no, $email_phone)));
-        $this->qr = "<img src='data:image/png;base64, {$img}'> ";
+$identifier = $this->irlReport['sku_no']
+    ?? $this->irlReport['email']
+    ?? $this->irlReport['phone'];
+
+$img = base64_encode(
+    QrCode::size(200)
+        ->format('png')
+        ->generate(IrlReport::generateURL($reference_no, $identifier))
+);
+
+$this->qr = "<img src='data:image/png;base64, {$img}'> ";
+
     }
 
     public function createIrlReport()
     {
+
         $this->resetErrorBag();
         $this->validate();
 
@@ -85,6 +95,9 @@ class CreateIrlReport extends Component
         $this->repo->email = $this->irlReport['email'];
         $this->repo->reference_no = $this->irlReport['reference_no'];
         $this->repo->created_at = $this->irlReport['created_at'];
+
+        //temporary change
+        $this->repo->SKU_no = "R1213456";
 
         if ($this->report) {
             $this->repo->status = $this->irlReport['status'];
@@ -111,7 +124,6 @@ class CreateIrlReport extends Component
     {
         $this->resetErrorBag();
         $this->validate();
-
         $this->repo->name   = $this->irlReport['name'];
         $this->repo->phone  = $this->irlReport['phone'];
         $this->repo->email  = $this->irlReport['email'];
@@ -154,19 +166,27 @@ class CreateIrlReport extends Component
     {
         $this->user = auth()->user();
 
+
         if (!$this->irlReport && $this->irlReportId) {
+
             $this->repo = IrlReport::find($this->irlReportId);
+
             $this->irlReport = $this->repo->toArray();
+
             $reference_no = $this->irlReport['reference_no'];
             $email_phone = $this->irlReport['email'];
+
+            $identifier = $this->irlReport['SKU_no'] ?? $this->irlReport['email'];
             $this->action = "update";
         } else {
             $reference_no = $this->irlReport['reference_no'] = IrlReport::getNextReferenceNo();
             $email_phone = '';
+            $identifier = $this->irlReport['SKU_no']??'';
             $this->irlReport['email'] = $email_phone;
+
             $this->irlReport['status'] = IrlReport::DRAFT;
         }
-        $img = base64_encode(QrCode::size(200)->format('png')->generate(IrlReport::generateURL($reference_no, $email_phone)));
+        $img = base64_encode(QrCode::size(200)->format('png')->generate(IrlReport::generateURL($reference_no, $identifier)));
 
         $this->qr = "<img src='data:image/png;base64, {$img}'> ";
         $this->button = create_button($this->action, "Irl");

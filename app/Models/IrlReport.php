@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Crypt;
 
 class IrlReport extends Model
@@ -114,13 +115,27 @@ class IrlReport extends Model
         return $nextReferenceNo;
     }
 
-    public static function generateURL($referenceNo, $emailPhone)
+    public static function generateURL($referenceNo, $identifier)
     {
-        $encryptedUrl =  Crypt::encryptString($referenceNo . '|' .  $emailPhone);
 
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            $encryptedUrl =  Crypt::encryptString($referenceNo . '|' .  $identifier);
+        }
+        else{
+    // Use custom encryption key from .env (must be base64-encoded 32-byte key)
+    $base64Key = env('CUSTOM_KEY'); // Example: base64:M0dydVp4aVNTSmR2WlFuY0xLaElDV2FHTVdjQUdCc3k=
+    $key = base64_decode(str_replace('base64:', '', $base64Key));
+
+    // Create Encrypter instance with custom key and AES-256-CBC cipher
+    $encrypter = new Encrypter($key, 'AES-256-CBC');
+    // Encrypt the string: referenceNo|identifier
+    $encryptedUrl = $encrypter->encrypt("{$referenceNo}|{$identifier}");
+        }
+    if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
         return route('irl-report.validate.encrypted', ['encryptedUrl' => $encryptedUrl]);
-        // dump ($encryptedUrl);
-        return route('irl-report.validate', ['emailPhone' => $encryptedUrl, 'referenceNo' => $referenceNo]);
+    }
+    // Return encrypted route
+    return route('irl-report.validate.inventory.encrypted', ['encryptedUrl' => $encryptedUrl]);
     }
 
     public function generateEncryptedUrl()
