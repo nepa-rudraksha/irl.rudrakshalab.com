@@ -52,7 +52,7 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     }
 
     // Optional fields
-    if ($request->name || $request->phone || $request->email || $request->user_id || $request->created_by) {
+    if ($request->name && $request->phone && $request->email && $request->user_id && $request->created_by) {
         $order->name       = $request->name ?? $order->name;
         $order->phone      = $request->phone ?? $order->phone;
         $order->email      = $request->email ?? $order->email;
@@ -60,6 +60,12 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
         $order->created_by = $request->created_by ?? $order->created_by;
 
         $this->email = $request->email;
+    }
+    else{
+        return response()->json([
+            'message' => 'Incomplete order data. Please provide name, phone, email, user_id, and created_by.',
+            'success' => false,
+        ],422);
     }
 
     // Ensure created_at is set only if creating
