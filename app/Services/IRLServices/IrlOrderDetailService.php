@@ -28,51 +28,55 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     
 
     public function saveOrderDetail($request)
+{
+    $reference_no = $request->reference_no ?? null;
 
-    {
+    // Case 1: If reference_no exists in request → try to update
+    if ($reference_no) {
+        $order = IrlReport::where('reference_no', $reference_no)->first();
 
+        if (!$order) {
+            return "Error: Invalid IRL reference number.";
+        }
+    } else {
+        // Case 2: No reference number → create new record with new IRL number
         $order = new IrlReport();
-        if($request->name || $request->phone || $request->email || $request->user_id || $request->created_by){
-            $order->name = $request->name;
-
-            $order->phone = $request->phone;
-    
-            $order->email = $request->email;
-    
-            $this->email = $request->email;
-            
-            $order->created_by = $request->created_by;
-
-            $order->user_id = $request->user_id;
-        }
-        if($request->SKU_no){
-            $order->SKU_no = $request->SKU_no;
-            $this->SKU_no = $order->SKU_no;
-
-        }
-
-        $order->reference_no = $order->getNextReferenceNo();
-
+        $order->reference_no = IrlReport::getNextReferenceNo();
         $this->reference_no = $order->reference_no;
+    }
 
-        $order->status = $order::DRAFT;  
+    // If SKU_no is present (for both create or update)
+    if ($request->SKU_no) {
+        $order->SKU_no = $request->SKU_no;
+        $this->SKU_no = $order->SKU_no;
+    }
 
+    // Optional fields
+    if ($request->name || $request->phone || $request->email || $request->user_id || $request->created_by) {
+        $order->name       = $request->name ?? $order->name;
+        $order->phone      = $request->phone ?? $order->phone;
+        $order->email      = $request->email ?? $order->email;
+        $order->user_id    = $request->user_id ?? $order->user_id;
+        $order->created_by = $request->created_by ?? $order->created_by;
 
-        $order->created_at = Carbon::now()->format('Y-m-d H:i:s');
+        $this->email = $request->email;
+    }
 
-if ($order->save()) {
+    // Ensure created_at is set only if creating
+    if (!$order->exists) {
+        $order->created_at = now();
+        $order->status = IrlReport::DRAFT;
+    }
 
-    return 'Order published successfully!';
-
-} else {
-
-    return 'Error: Order could not be saved.';
-
+    if ($order->save()) {
+        return $order->wasRecentlyCreated 
+            ? 'Order created successfully!'
+            : 'Order updated successfully!';
+    } else {
+        return 'Error: Order could not be saved.';
+    }
 }
 
-        //return 'Order published successfully!';
-
-    }
 
     public function getReferenceNo()
 
