@@ -46,15 +46,12 @@ class OrderController extends Controller
 
 
 
-        $this->irlOrderDetailService->saveOrderDetail($request);
+        $message = $this->irlOrderDetailService->saveOrderDetail($request);
 
         $reference_no = $this->irlOrderDetailService->getReferenceNo();
+        
 
-        Log::info("img fails:",['reference_no'=>$reference_no]);
-
-        $img = $this->irlOrderDetailService->getQrImg();
-
-        Log::info("reference failes:",['reference_no'=>$reference_no]);
+        Log::info("reference log:",['reference_no'=>$reference_no]);
 
         ob_clean();
 
@@ -64,9 +61,7 @@ class OrderController extends Controller
 
             [
 
-                'message' => 'Order created successfully!',
-
-                'img'=>$img,
+                'message' => $message,
 
                 'reference_no'=>$reference_no,
 
