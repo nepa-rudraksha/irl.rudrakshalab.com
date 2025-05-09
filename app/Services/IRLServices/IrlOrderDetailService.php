@@ -38,6 +38,9 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
             $order = new IrlReport();
             $order->SKU_no = $request->SKU_no;
             $order->reference_no = IrlReport::getNextReferenceNo();
+            $this->reference_no = $order->reference_no;
+            $this->SKU_no = $request->SKU_no;
+            
         }
     
         // Case 1: Only SKU_no received (initial creation)
@@ -63,6 +66,7 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
             $order->name       = $request->name;
             $order->phone      = $request->phone;
             $order->email      = $request->email;
+            $this->email = $request->email;
             $order->user_id    = $request->user_id;
             $order->created_by = $request->created_by;
             $order->status     = IrlReport::PUBLISHED;
