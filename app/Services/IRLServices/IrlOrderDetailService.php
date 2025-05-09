@@ -33,7 +33,14 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     {
         
         // Check if this is an update to existing SKU
-        $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
+        if ($request->filled('reference_no')) {
+            $order = IrlReport::where('SKU_no', $request->SKU_no)
+                            ->where('reference_no', $request->reference_no)
+                            ->first();
+        } else {
+            $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
+        }
+
         Log::info("order:",['order'=>$order]);
         // If not found, create a new instance
         if (!$order) {
