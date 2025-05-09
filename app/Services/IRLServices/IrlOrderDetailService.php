@@ -82,10 +82,18 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     
 public function savePDF($request){
   // Validate the request
-    $request->validate([
-        'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
+try {
+    $validated = $request->validate([
+        'pdf' => 'required|file|mimes:pdf|max:10240',
         'reference_no' => 'required|string|exists:irl_reports,reference_no',
     ]);
+} catch (\Illuminate\Validation\ValidationException $e) {
+    return response()->json([
+        'message' => 'Validation failed',
+        'errors' => $e->errors(),
+    ], 422);
+}
+
 
     $file = $request->file('pdf');
 
