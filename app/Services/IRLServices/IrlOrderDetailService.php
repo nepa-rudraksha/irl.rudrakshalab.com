@@ -103,7 +103,7 @@ public function savePDF($request)
         $file = $request->file('pdf');
         $filename = (string) Str::uuid() . $request->input('reference_no') . "." . $request->file('pdf')->extension();
 ;
-        $file->storeAs('public/report', $filename);
+        $file->storeAs('report', $filename);
 
         // Find the related IrlReport
         $report = IrlReport::where('reference_no', $request->reference_no)->first();
