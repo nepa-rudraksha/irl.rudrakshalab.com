@@ -93,7 +93,7 @@ class OrderController extends Controller
 
     function savePDF(Request $request){
         try{
-        
+        Log::info("reference log:",['reference_no'=>$request]);
         $message = $this->irlOrderDetailService->savePDF($request);
                Log::info("reference log:",['reference_no'=>$request]);
                
