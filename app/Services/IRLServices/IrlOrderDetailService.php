@@ -101,7 +101,7 @@ public function savePDF($request)
     try {
         // Store the PDF
         $file = $request->file('pdf');
-        $filename = (string) Str::uuid() . $request->input('reference_no') . "." . $request->file('report')->extension();
+        $filename = (string) Str::uuid() . $request->input('reference_no') . "." . $request->file('pdf')->extension();
 ;
         $file->storeAs('public/report', $filename);
 
