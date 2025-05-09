@@ -15,7 +15,6 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Log;
 
 
-
 class IrlOrderDetailService implements IrlOrderDetailInterface
 
 {
@@ -28,60 +27,54 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     
 
     public function saveOrderDetail($request)
-{
-    $reference_no = $request->reference_no ?? null;
-
-    // Case 1: If reference_no exists in request → try to update
-    if ($reference_no) {
-        $order = IrlReport::where('reference_no', $reference_no)->first();
-
+    {
+        
+        // Check if this is an update to existing SKU
+        $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
+        Log::info("order:",['order'=>$order]);
+        // If not found, create a new instance
         if (!$order) {
-            return "Error: Invalid IRL reference number.";
+            Log::info("order fail:",['order'=>$order]);
+            $order = new IrlReport();
+            $order->SKU_no = $request->SKU_no;
+            $order->reference_no = IrlReport::getNextReferenceNo();
         }
-    } else {
-        // Case 2: No reference number → create new record with new IRL number
-        $order = new IrlReport();
-        $order->reference_no = IrlReport::getNextReferenceNo();
-        $this->reference_no = $order->reference_no;
+    
+        // Case 1: Only SKU_no received (initial creation)
+        if (
+            !$request->name && !$request->phone &&
+            !$request->email && !$request->user_id &&
+            !$request->created_by
+        ) {
+            Log::info("sku only order:",['order'=>$order]);
+            $order->status = IrlReport::DRAFT;
+            $order->created_at = now();
+            $order->save();
+            return "SKU stored successfully.";
+        }
+    
+        // Case 2: Full data received — must validate ALL required fields
+        if (
+            $request->name && $request->phone &&
+            $request->email && $request->user_id &&
+            $request->created_by
+        ) {
+            Log::info("whole data order:",['order'=>$order]);
+            $order->name       = $request->name;
+            $order->phone      = $request->phone;
+            $order->email      = $request->email;
+            $order->user_id    = $request->user_id;
+            $order->created_by = $request->created_by;
+            $order->status     = IrlReport::PUBLISHED;
+            $order->created_at = now();
+            $order->save();
+            return "Order saved successfully.";
+        }
+    
+        // Case 3: Partial data — reject
+        return "Incomplete data. Please send all of name, phone, email, user_id, and created_by together.";
     }
-
-    // If SKU_no is present (for both create or update)
-    if ($request->SKU_no) {
-        $order->SKU_no = $request->SKU_no;
-        $this->SKU_no = $order->SKU_no;
-    }
-
-    // Optional fields
-    if ($request->name && $request->phone && $request->email && $request->user_id && $request->created_by) {
-        $order->name       = $request->name ?? $order->name;
-        $order->phone      = $request->phone ?? $order->phone;
-        $order->email      = $request->email ?? $order->email;
-        $order->user_id    = $request->user_id ?? $order->user_id;
-        $order->created_by = $request->created_by ?? $order->created_by;
-
-        $this->email = $request->email;
-    }
-    else{
-        return response()->json([
-            'message' => 'Incomplete order data. Please provide name, phone, email, user_id, and created_by.',
-            'success' => false,
-        ],422);
-    }
-
-    // Ensure created_at is set only if creating
-    if (!$order->exists) {
-        $order->created_at = now();
-        $order->status = IrlReport::DRAFT;
-    }
-
-    if ($order->save()) {
-        return $order->wasRecentlyCreated 
-            ? 'Order created successfully!'
-            : 'Order updated successfully!';
-    } else {
-        return 'Error: Order could not be saved.';
-    }
-}
+    
 
 
     public function getReferenceNo()
