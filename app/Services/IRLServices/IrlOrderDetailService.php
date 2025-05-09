@@ -14,6 +14,8 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Livewire\WithFileUploads;
 
 
 class IrlOrderDetailService implements IrlOrderDetailInterface
@@ -99,7 +101,8 @@ public function savePDF($request)
     try {
         // Store the PDF
         $file = $request->file('pdf');
-        $filename = $request->reference_no . '.pdf';
+        $filename = (string) Str::uuid() . $request->input('reference_no') . "." . $request->file('report')->extension();
+;
         $file->storeAs('public/report', $filename);
 
         // Find the related IrlReport
