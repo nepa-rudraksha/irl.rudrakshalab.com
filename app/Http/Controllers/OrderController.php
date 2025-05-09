@@ -91,6 +91,41 @@ class OrderController extends Controller
 
     }
 
+    function savePDF(Request $request){
+        try{
+        
+        $message = $this->irlOrderDetailService->savePDF($request);
+               Log::info("reference log:",['reference_no'=>$request]);
+               
+        ob_clean();
+                return response()->json(
+
+            [
+
+                'message' => $message,
+
+            ]
+
+            , 200);
+        }
+               catch(Exception $e){
+
+            Log::error('Error sending data to API', ['message' => $e->getMessage()]);
+
+
+
+            return response()->json([
+
+                'message' => 'An error occurred while sending data.',
+
+                'success' => false,
+
+                'error' => $e->getMessage(),
+
+            ], 500);
+
+        }
+    }
     function storeOrderTest(Request $request){
         return response()->json(
 

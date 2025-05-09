@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 
 class IrlOrderDetailService implements IrlOrderDetailInterface
@@ -79,7 +80,33 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
         return "Incomplete data. Please send all of name, phone, email, user_id, and created_by together.";
     }
     
+public function savePDF($request){
+  // Validate the request
+    $request->validate([
+        'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
+        'reference_no' => 'required|string|exists:irl_reports,reference_no',
+    ]);
 
+    $file = $request->file('pdf');
+
+    // Generate a filename based on reference number
+    $filename = $request->reference_no . '.pdf';
+
+    // Store the file in storage/app/public/report
+    $path = $file->storeAs('public/report', $filename);
+
+    // Update the IrlReport record
+    $report = IrlReport::where('reference_no', $request->reference_no)->first();
+    $report->pdf_url = $filename;
+    $report->save();
+
+    return response()->json([
+        'message' => 'PDF uploaded successfully.',
+        'success' => true,
+        'filename' => $filename,
+        'url' => Storage::url("report/{$filename}")
+    ]);
+}
 
     public function getReferenceNo()
 
