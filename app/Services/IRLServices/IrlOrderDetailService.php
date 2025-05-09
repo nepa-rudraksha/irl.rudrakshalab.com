@@ -80,40 +80,54 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
         return "Incomplete data. Please send all of name, phone, email, user_id, and created_by together.";
     }
     
-public function savePDF($request){
-  // Validate the request
-try {
-    $validated = $request->validate([
-        'pdf' => 'required|file|mimes:pdf|max:10240',
-        'reference_no' => 'required|string|exists:irl_reports,reference_no',
-    ]);
-} catch (\Illuminate\Validation\ValidationException $e) {
-    return response()->json([
-        'message' => 'Validation failed',
-        'errors' => $e->errors(),
-    ], 422);
-}
+public function savePDF($request)
+{
+    try {
+        // Validate the incoming request
+        $validated = $request->validate([
+            'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
+            'reference_no' => 'required|string|exists:irl_reports,reference_no',
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $e->errors(),
+        ], 422);
+    }
 
+    try {
+        // Store the PDF
+        $file = $request->file('pdf');
+        $filename = $request->reference_no . '.pdf';
+        $file->storeAs('public/report', $filename);
 
-    $file = $request->file('pdf');
+        // Find the related IrlReport
+        $report = IrlReport::where('reference_no', $request->reference_no)->first();
 
-    // Generate a filename based on reference number
-    $filename = $request->reference_no . '.pdf';
+        if (!$report) {
+            return response()->json([
+                'message' => 'Reference number not found.',
+                'success' => false,
+            ], 404);
+        }
 
-    // Store the file in storage/app/public/report
-    $path = $file->storeAs('public/report', $filename);
+        // Update the pdf_url field and save
+        $report->pdf_url = $filename;
+        $report->save();
 
-    // Update the IrlReport record
-    $report = IrlReport::where('reference_no', $request->reference_no)->first();
-    $report->pdf_url = $filename;
-    $report->save();
-
-    return response()->json([
-        'message' => 'PDF uploaded successfully.',
-        'success' => true,
-        'filename' => $filename,
-        'url' => Storage::url("report/{$filename}")
-    ]);
+        return response()->json([
+            'message' => 'PDF uploaded successfully.',
+            'success' => true,
+            'filename' => $filename,
+            'url' => Storage::url("report/{$filename}")
+        ]);
+    } catch (\Exception $ex) {
+        return response()->json([
+            'message' => 'Something went wrong while uploading the PDF.',
+            'error' => $ex->getMessage(),
+            'success' => false
+        ], 500);
+    }
 }
 
     public function getReferenceNo()
