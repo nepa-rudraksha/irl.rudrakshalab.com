@@ -82,6 +82,8 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     
 public function savePDF($request)
 {
+    dd($request->all(), $request->file('pdf'));
+
     try {
         // Validate the incoming request
         $validated = $request->validate([
