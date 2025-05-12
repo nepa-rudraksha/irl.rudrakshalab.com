@@ -37,8 +37,10 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
             $order = IrlReport::where('SKU_no', $request->SKU_no)
                             ->where('reference_no', $request->reference_no)
                             ->first();
+                            
         } else {
             $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
+            $this->reference_no = $order->reference_no;
         }
 
         Log::info("order:",['order'=>$order]);
