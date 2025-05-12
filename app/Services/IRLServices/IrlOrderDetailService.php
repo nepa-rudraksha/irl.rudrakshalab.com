@@ -32,13 +32,17 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
 public function saveOrderDetail($request)
 {
     // STEP 1: Validate SKU and order ID mismatch
-    $existingSku = IrlReport::where('SKU_no', $request->SKU_no)->first();
-    if ($existingSku && $existingSku->order_id !== $request->order_id) {
-        return response()->json([
-            'message' => 'This SKU number is already used for a different order.',
-            'success' => false
-        ], 422);
-    }
+$existingMismatch = IrlReport::where('SKU_no', $request->SKU_no)
+    ->where('order_id', '!=', $request->order_id)
+    ->exists();
+
+if ($existingMismatch) {
+    return response()->json([
+        'message' => 'This SKU number is already used for a different order.',
+        'success' => false
+    ], 422);
+}
+
 
     // STEP 2: Check if all optional fields are missing → just SKU & order_id received
     $isOnlySkuProvided = !$request->name && !$request->phone &&
