@@ -9,14 +9,14 @@ class RemoveUniqueFromSkuNoColumnInIrlReportsTable extends Migration
     public function up()
     {
         Schema::table('irl_reports', function (Blueprint $table) {
-            $table->dropUnique(['SKU_no']); // remove unique index
+            $table->dropIndex(['SKU_no']); // remove unique index
         });
     }
 
     public function down()
     {
         Schema::table('irl_reports', function (Blueprint $table) {
-            $table->unique('SKU_no'); // add it back in rollback
+            $table->unique(['SKU_no']); // add it back in rollback
         });
     }
 }
