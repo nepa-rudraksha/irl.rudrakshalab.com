@@ -40,7 +40,6 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
                             
         } else {
             $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
-            $this->reference_no = $order->reference_no;
         }
 
         Log::info("order:",['order'=>$order]);
@@ -64,6 +63,7 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
             Log::info("sku only order:",['order'=>$order]);
             $order->status = IrlReport::DRAFT;
             $order->created_at = now();
+            $this->reference_no = $order->reference_no;
             $order->save();
             return "SKU stored successfully.";
         }
