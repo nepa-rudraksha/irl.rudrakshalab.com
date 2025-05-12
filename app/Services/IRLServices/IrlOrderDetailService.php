@@ -51,7 +51,6 @@ public function saveOrderDetail($request)
             $order->reference_no = IrlReport::getNextReferenceNo();
             $this->reference_no = $order->reference_no;
             $this->SKU_no = $request->SKU_no;
-            return "SKU stored successfully.";
         }
 
         // Case 1: Only SKU_no received (initial creation)
@@ -62,7 +61,7 @@ public function saveOrderDetail($request)
         ) {
             Log::info("sku only order:",['order'=>$order]);
             $order->status = IrlReport::DRAFT;
-            $order->created_at = now();
+            $order->created_at = $order->created_at??now();
             $this->reference_no = $order->reference_no;
             $order->save();
             return "SKU stored successfully.";
