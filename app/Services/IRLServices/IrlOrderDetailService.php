@@ -35,8 +35,9 @@ public function saveOrderDetail($request)
 $existingMismatch = IrlReport::where('SKU_no', $request->SKU_no)
     ->where('order_id', '!=', $request->order_id)
     ->exists();
-
+                Log::info("existing:",['existing'=>$existingMismatch]);
 if ($existingMismatch) {
+                    Log::info("existing2:",['existing'=>$existingMismatch]);
     return response()->json([
         'message' => 'This SKU number is already used for a different order.',
         'success' => false
