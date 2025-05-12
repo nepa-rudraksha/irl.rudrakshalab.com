@@ -31,34 +31,51 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
 
 public function saveOrderDetail($request)
 {
-    // STEP 1: Validate SKU and order ID mismatch
-$existingMismatch = IrlReport::where('SKU_no', $request->SKU_no)
-    ->where('order_id', '!=', 'null')
-    ->where('order_id', '!=', $request->order_id)
-    ->exists();
-                Log::info("existing:",['existing'=>$existingMismatch]);
-if ($existingMismatch) {
-                    Log::info("existing2:",['existing'=>$existingMismatch]);
-    return response()->json([
-        'message' => 'This SKU number is already used for a different order.',
-        'success' => false
-    ], 422);
-}
+    $sku       = $request->SKU_no;
+    $orderId   = $request->order_id;
 
+    // 🔒 STEP 1: Validate SKU misuse
+    if ($orderId) {
+        // Check if this SKU is used in another order
+        $conflict = IrlReport::where('SKU_no', $sku)
+            ->where('order_id', '!=', $orderId)
+            ->whereNotNull('order_id')
+            ->exists();
 
-    // STEP 2: Check if all optional fields are missing → just SKU & order_id received
-    $isOnlySkuProvided = !$request->name && !$request->phone &&
-                         !$request->email && !$request->user_id &&
-                         !$request->created_by;
+        if ($conflict) {
+            return response()->json([
+                'message' => 'This SKU number is already used for a different order.',
+                'success' => false
+            ], 422);
+        }
+    } else {
+        // No order_id: Check if SKU is already used without order_id
+        $conflict = IrlReport::where('SKU_no', $sku)
+            ->whereNull('order_id')
+            ->exists();
 
-    if ($isOnlySkuProvided) {
+        if ($conflict) {
+            return response()->json([
+                'message' => 'This SKU number is already used (without order ID).',
+                'success' => false
+            ], 422);
+        }
+    }
+
+    // ✅ STEP 2: Draft record with only SKU (and optional order_id)
+    $isOnlySku = !$request->name && !$request->phone &&
+                 !$request->email && !$request->user_id &&
+                 !$request->created_by;
+
+    if ($isOnlySku) {
         $order = new IrlReport();
-        $order->SKU_no       = $request->SKU_no;
-        $order->order_id     = $request->order_id;
+        $order->SKU_no       = $sku;
+        $order->order_id     = $orderId;
         $order->reference_no = IrlReport::getNextReferenceNo();
         $order->status       = IrlReport::DRAFT;
         $order->created_at   = now();
         $order->save();
+
         $this->reference_no = $order->reference_no;
 
         return response()->json([
@@ -68,20 +85,19 @@ if ($existingMismatch) {
         ]);
     }
 
-    // STEP 3: All required data present — check if updating existing record
-    $hasFullData = $request->name && $request->phone &&
-                   $request->email && $request->user_id &&
-                   $request->created_by;
+    // ✅ STEP 3: Full certificate data
+    $hasAllData = $request->name && $request->phone &&
+                  $request->email && $request->user_id &&
+                  $request->created_by;
 
-    if ($hasFullData) {
-        // Look for existing row with matching SKU + order_id + reference_no
-        $order = IrlReport::where('SKU_no', $request->SKU_no)
-                    ->where('order_id', $request->order_id)
-                    ->where('reference_no', $request->reference_no)
-                    ->first();
+    if ($hasAllData) {
+        // Find existing row to update
+        $order = IrlReport::where('SKU_no', $sku)
+            ->when($orderId, fn($q) => $q->where('order_id', $orderId))
+            ->when($request->reference_no, fn($q) => $q->where('reference_no', $request->reference_no))
+            ->first();
 
         if ($order) {
-            // ✅ UPDATE existing
             $order->name       = $request->name;
             $order->phone      = $request->phone;
             $order->email      = $request->email;
@@ -94,35 +110,36 @@ if ($existingMismatch) {
                 'message' => 'Existing certificate updated successfully.',
                 'success' => true
             ]);
-        } else {
-            // ✅ NEW entry (fresh row)
-            $order = new IrlReport();
-            $order->SKU_no       = $request->SKU_no;
-            $order->order_id     = $request->order_id;
-            $order->reference_no = IrlReport::getNextReferenceNo();
-            $order->name         = $request->name;
-            $order->phone        = $request->phone;
-            $order->email        = $request->email;
-            $order->user_id      = $request->user_id;
-            $order->created_by   = $request->created_by;
-            $order->status       = IrlReport::PUBLISHED;
-            $order->created_at   = now();
-            $order->save();
-
-            return response()->json([
-                'message' => 'New certificate created successfully.',
-                'reference_no' => $order->reference_no,
-                'success' => true
-            ]);
         }
+
+        // Create new record
+        $order = new IrlReport();
+        $order->SKU_no       = $sku;
+        $order->order_id     = $orderId;
+        $order->reference_no = IrlReport::getNextReferenceNo();
+        $order->name         = $request->name;
+        $order->phone        = $request->phone;
+        $order->email        = $request->email;
+        $order->user_id      = $request->user_id;
+        $order->created_by   = $request->created_by;
+        $order->status       = IrlReport::PUBLISHED;
+        $order->created_at   = now();
+        $order->save();
+
+        return response()->json([
+            'message' => 'New certificate created successfully.',
+            'reference_no' => $order->reference_no,
+            'success' => true
+        ]);
     }
 
-    // STEP 4: Partial data (invalid)
+    // 🚫 STEP 4: Incomplete data
     return response()->json([
         'message' => 'Incomplete data. Please send all of name, phone, email, user_id, and created_by together.',
         'success' => false
     ], 422);
 }
+
 
     
 public function savePDF($request)
