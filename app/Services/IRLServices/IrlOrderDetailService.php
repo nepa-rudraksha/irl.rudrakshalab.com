@@ -29,67 +29,95 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
 
     
 
-    public function saveOrderDetail($request)
-    {
-        
-        // Check if this is an update to existing SKU
-        if ($request->filled('reference_no')) {
-            $order = IrlReport::where('SKU_no', $request->SKU_no)
-                            ->where('reference_no', $request->reference_no)
-                            ->first();
-                            
-        } else {
-            $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
-        }
+public function saveOrderDetail($request)
+{
+    // STEP 1: Validate SKU and order ID mismatch
+    $existingSku = IrlReport::where('SKU_no', $request->SKU_no)->first();
+    if ($existingSku && $existingSku->order_id !== $request->order_id) {
+        return response()->json([
+            'message' => 'This SKU number is already used for a different order.',
+            'success' => false
+        ], 422);
+    }
 
-        Log::info("order:",['order'=>$order]);
-        // If not found, create a new instance
-        if (!$order) {
-            Log::info("order fail:",['order'=>$order]);
-            $order = new IrlReport();
-            $order->SKU_no = $request->SKU_no;
-            $order->reference_no = IrlReport::getNextReferenceNo();
-            $this->reference_no = $order->reference_no;
-            $this->SKU_no = $request->SKU_no;
-            
-        }
-    
-        // Case 1: Only SKU_no received (initial creation)
-        if (
-            !$request->name && !$request->phone &&
-            !$request->email && !$request->user_id &&
-            !$request->created_by
-        ) {
-            Log::info("sku only order:",['order'=>$order]);
-            $order->status = IrlReport::DRAFT;
-            $order->created_at = now();
-            $this->reference_no = $order->reference_no;
-            $order->save();
-            return "SKU stored successfully.";
-        }
-    
-        // Case 2: Full data received — must validate ALL required fields
-        if (
-            $request->name && $request->phone &&
-            $request->email && $request->user_id &&
-            $request->created_by
-        ) {
-            Log::info("whole data order:",['order'=>$order]);
+    // STEP 2: Check if all optional fields are missing → just SKU & order_id received
+    $isOnlySkuProvided = !$request->name && !$request->phone &&
+                         !$request->email && !$request->user_id &&
+                         !$request->created_by;
+
+    if ($isOnlySkuProvided) {
+        $order = new IrlReport();
+        $order->SKU_no       = $request->SKU_no;
+        $order->order_id     = $request->order_id;
+        $order->reference_no = IrlReport::getNextReferenceNo();
+        $order->status       = IrlReport::DRAFT;
+        $order->created_at   = now();
+        $order->save();
+        $this->reference_no = $order->reference_no;
+
+        return response()->json([
+            'message' => 'SKU stored successfully with new reference_no.',
+            'reference_no' => $order->reference_no,
+            'success' => true
+        ]);
+    }
+
+    // STEP 3: All required data present — check if updating existing record
+    $hasFullData = $request->name && $request->phone &&
+                   $request->email && $request->user_id &&
+                   $request->created_by;
+
+    if ($hasFullData) {
+        // Look for existing row with matching SKU + order_id + reference_no
+        $order = IrlReport::where('SKU_no', $request->SKU_no)
+                    ->where('order_id', $request->order_id)
+                    ->where('reference_no', $request->reference_no)
+                    ->first();
+
+        if ($order) {
+            // ✅ UPDATE existing
             $order->name       = $request->name;
             $order->phone      = $request->phone;
             $order->email      = $request->email;
-            $this->email = $request->email;
             $order->user_id    = $request->user_id;
             $order->created_by = $request->created_by;
             $order->status     = IrlReport::PUBLISHED;
-            $order->created_at = now();
             $order->save();
-            return "Order saved successfully.";
+
+            return response()->json([
+                'message' => 'Existing certificate updated successfully.',
+                'success' => true
+            ]);
+        } else {
+            // ✅ NEW entry (fresh row)
+            $order = new IrlReport();
+            $order->SKU_no       = $request->SKU_no;
+            $order->order_id     = $request->order_id;
+            $order->reference_no = IrlReport::getNextReferenceNo();
+            $order->name         = $request->name;
+            $order->phone        = $request->phone;
+            $order->email        = $request->email;
+            $order->user_id      = $request->user_id;
+            $order->created_by   = $request->created_by;
+            $order->status       = IrlReport::PUBLISHED;
+            $order->created_at   = now();
+            $order->save();
+
+            return response()->json([
+                'message' => 'New certificate created successfully.',
+                'reference_no' => $order->reference_no,
+                'success' => true
+            ]);
         }
-    
-        // Case 3: Partial data — reject
-        return "Incomplete data. Please send all of name, phone, email, user_id, and created_by together.";
     }
+
+    // STEP 4: Partial data (invalid)
+    return response()->json([
+        'message' => 'Incomplete data. Please send all of name, phone, email, user_id, and created_by together.',
+        'success' => false
+    ], 422);
+}
+
     
 public function savePDF($request)
 {
