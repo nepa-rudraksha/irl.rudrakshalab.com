@@ -33,6 +33,7 @@ public function saveOrderDetail($request)
 {
     // STEP 1: Validate SKU and order ID mismatch
 $existingMismatch = IrlReport::where('SKU_no', $request->SKU_no)
+    ->where('order_id', '!=', 'null')
     ->where('order_id', '!=', $request->order_id)
     ->exists();
                 Log::info("existing:",['existing'=>$existingMismatch]);
