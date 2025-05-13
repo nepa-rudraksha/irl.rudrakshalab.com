@@ -98,52 +98,83 @@ public function storeBulkOrderDetail($request){
 public function savePDF($request)
 {
 
-    try {
-        // Validate the incoming request
-        $validated = $request->validate([
-            'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
-            'reference_no' => 'required|string|exists:irl_reports,reference_no',
-        ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'message' => 'Validation failed',
-            'errors' => $e->errors(),
-        ], 422);
+//     try {
+//         // Validate the incoming request
+//         $validated = $request->validate([
+//             'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
+//             'reference_no' => 'required|string|exists:irl_reports,reference_no',
+//         ]);
+//     } catch (\Illuminate\Validation\ValidationException $e) {
+//         return response()->json([
+//             'message' => 'Validation failed',
+//             'errors' => $e->errors(),
+//         ], 422);
+//     }
+
+//     try {
+//         // Store the PDF
+//         $file = $request->file('pdf');
+//         $filename = (string) Str::uuid() . $request->input('reference_no') . "." . $request->file('pdf')->extension();
+// ;
+//         $file->storeAs('report', $filename);
+
+//         // Find the related IrlReport
+//         $report = IrlReport::where('reference_no', $request->reference_no)->first();
+
+//         if (!$report) {
+//             return response()->json([
+//                 'message' => 'Reference number not found.',
+//                 'success' => false,
+//             ], 404);
+//         }
+
+//         // Update the pdf_url field and save
+//         $report->pdf_url = $filename;
+//         $report->save();
+
+//         return response()->json([
+//             'message' => 'PDF uploaded successfully.',
+//             'success' => true,
+//             'filename' => $filename,
+//             'url' => Storage::url("report/{$filename}")
+//         ]);
+//     } catch (\Exception $ex) {
+//         return response()->json([
+//             'message' => 'Something went wrong while uploading the PDF.',
+//             'error' => $ex->getMessage(),
+//             'success' => false
+//         ], 500);
+//     }
+  // Step 1: Validate the input
+    $validated = $request->validate([
+        'SKU_no' => 'required|string',
+        'reference_no' => 'required|string|exists:irl_reports,reference_no',
+        'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
+    ]);
+
+    // Step 2: Match SKU and reference_no in DB
+    $record = IrlReport::where('SKU_no', $request->SKU_no)
+                ->where('reference_no', $request->reference_no)
+                ->first();
+
+    if (!$record) {
+        return 'SKU and Reference number do not match or record not found.';
     }
 
+    // Step 3: Store PDF
     try {
-        // Store the PDF
         $file = $request->file('pdf');
-        $filename = (string) Str::uuid() . $request->input('reference_no') . "." . $request->file('pdf')->extension();
-;
+        $filename = (string) Str::uuid() . '_' . $request->reference_no . '.' . $file->getClientOriginalExtension();
         $file->storeAs('report', $filename);
 
-        // Find the related IrlReport
-        $report = IrlReport::where('reference_no', $request->reference_no)->first();
+        // Step 4: Save PDF path in DB
+        $record->pdf_url = $filename;
+        $record->save();
 
-        if (!$report) {
-            return response()->json([
-                'message' => 'Reference number not found.',
-                'success' => false,
-            ], 404);
-        }
-
-        // Update the pdf_url field and save
-        $report->pdf_url = $filename;
-        $report->save();
-
-        return response()->json([
-            'message' => 'PDF uploaded successfully.',
-            'success' => true,
-            'filename' => $filename,
-            'url' => Storage::url("report/{$filename}")
-        ]);
+        return 'PDF uploaded and linked successfully.';
     } catch (\Exception $ex) {
-        return response()->json([
-            'message' => 'Something went wrong while uploading the PDF.',
-            'error' => $ex->getMessage(),
-            'success' => false
-        ], 500);
+        Log::error('PDF Upload Error', ['error' => $ex->getMessage()]);
+        return 'Something went wrong while uploading the PDF.';
     }
 }
 
