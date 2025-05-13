@@ -60,7 +60,7 @@ public function saveOrderDetail($request)
             !$request->created_by
         ) {
             Log::info("sku only order:",['order'=>$order]);
-            $order->status = IrlReport::DRAFT;
+            $order->status = IrlReport::PUBLISHED;
             $order->created_at = $order->created_at??now();
             $this->reference_no = $order->reference_no;
             $order->save();
@@ -80,7 +80,7 @@ public function saveOrderDetail($request)
             $this->email = $request->email;
             $order->user_id    = $request->user_id;
             $order->created_by = $request->created_by;
-            $order->status     = IrlReport::PUBLISHED;
+            // $order->status     = IrlReport::PUBLISHED;
             $order->created_at = now();
             $order->save();
             return "Order saved successfully.";
