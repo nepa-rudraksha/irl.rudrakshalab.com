@@ -73,7 +73,7 @@ class OrderController extends Controller
 
         catch(Exception $e){
 
-            Log::error('Error sending data to API', ['message' => $e->getMessage()]);
+            Log::error('Error sending data to API', ['message' => $e->getMessage(),'request' => $request]);
 
 
 
