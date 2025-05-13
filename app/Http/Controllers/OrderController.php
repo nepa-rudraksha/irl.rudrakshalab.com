@@ -51,7 +51,7 @@ class OrderController extends Controller
         $reference_no = $this->irlOrderDetailService->getReferenceNo();
         
 
-        Log::info("reference log:",['reference_no'=>$reference_no]);
+        Log::info("reference log:",['reference_no'=>$reference_no,'request' => $request]);
 
         ob_clean();
 
@@ -73,7 +73,7 @@ class OrderController extends Controller
 
         catch(Exception $e){
 
-            Log::error('Error sending data to API', ['message' => $e->getMessage(),'request' => $request]);
+            Log::error('Error sending data to API', ['message' => $e->getMessage()]);
 
 
 
