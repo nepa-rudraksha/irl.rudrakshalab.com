@@ -142,6 +142,7 @@ public function storeBulkOrder(Request $request)
     try {
         $payload = $request->all();
                 if (isset($payload['SKU_no'])) {
+                                   Log::info("reference log:",['payload' => $payload]);
             $payload = [$payload];
         }
 
