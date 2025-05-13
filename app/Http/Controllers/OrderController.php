@@ -192,10 +192,24 @@ public function storeBulkOrder(Request $request)
 
     }
 
-    public function storePDF(){
+    public function storePDF(Request $request){
+    try {
+        // Delegate logic to the service function
+        $message = $this->irlOrderDetailService->savePDF($request);
 
-        
+        return response()->json([
+            'message' => $message
+        ], 200);
 
+    } catch (\Exception $e) {
+        Log::error('PDF Store Failed', ['error' => $e->getMessage()]);
+
+        return response()->json([
+            'message' => 'Failed to upload PDF.',
+            'success' => false,
+            'error' => $e->getMessage()
+        ], 500);
+    }
     }
 
 }
