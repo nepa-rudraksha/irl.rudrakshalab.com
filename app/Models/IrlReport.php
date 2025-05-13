@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 
 class IrlReport extends Model
 {
@@ -55,20 +56,41 @@ class IrlReport extends Model
 
     public static function getNextReferenceNo()
     {
-        $record = self::latest()->first();
+        // $record = self::latest()->first();
 
-        $prefix = self::$prefix;
+        // $prefix = self::$prefix;
 
 
-        if (empty($record->reference_no)) {
-            return $prefix . '0001';
-        }
+        // if (empty($record->reference_no)) {
+        //     return $prefix . '0001';
+        // }
 
-        $expNum = preg_split('/^2030213/', $record->reference_no);
+        // $expNum = preg_split('/^2030213/', $record->reference_no);
 
-        //increase 1 with last invoice number
-        $nextReferenceNo = $prefix . str_pad($expNum[1] + 1, 4, "0", STR_PAD_LEFT);
-        return $nextReferenceNo;
+        // //increase 1 with last invoice number
+        // $nextReferenceNo = $prefix . str_pad($expNum[1] + 1, 4, "0", STR_PAD_LEFT);
+        // return $nextReferenceNo;
+
+    $prefix = '2030213';
+
+    // Lock the row to prevent race conditions
+    $next = DB::transaction(function () use ($prefix) {
+        $counter = DB::table('reference_counters')
+            ->where('prefix', $prefix)
+            ->lockForUpdate()
+            ->first();
+
+        $nextNumber = $counter->last_number + 1;
+
+        DB::table('reference_counters')
+            ->where('prefix', $prefix)
+            ->update(['last_number' => $nextNumber]);
+
+        return $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    });
+
+    return $next;
+
     }
 
 
