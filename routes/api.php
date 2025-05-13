@@ -31,6 +31,7 @@ use App\Http\Controllers\OrderController;
 */
 
 Route::post('/receive-order',[OrderController::class,'storeOrder'])->name('api.receive-order')->withoutMiddleware(['auth','throttle']);
+Route::post('/receive-bulk-order',[OrderController::class,'storeBulkOrder'])->name('api.receive-bulk-order')->withoutMiddleware(['auth','throttle']);
 Route::post('/receive-order-test',[OrderController::class,'storeOrderTest'])->name('api.receive-order-test')->withoutMiddleware(['auth','throttle']);
 Route::post('/publish-qr',[OrderController::class,'publishOrder'])->name('api.publish-order')->withoutMiddleware(['auth','throttle']);
 

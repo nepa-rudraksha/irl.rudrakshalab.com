@@ -126,6 +126,9 @@ class OrderController extends Controller
 
         }
     }
+    function storeBulkOrder(Request $request){
+            
+    }
     function storeOrderTest(Request $request){
         return response()->json(
 
