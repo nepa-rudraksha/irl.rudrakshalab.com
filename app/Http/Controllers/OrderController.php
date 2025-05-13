@@ -152,7 +152,7 @@ public function storeBulkOrder(Request $request)
         foreach ($payload as $skuData) {
             // 🔁 Create a new Request instance with current item’s data
             $skuRequest = new Request($skuData);
-            Log::info("reference log:",['skuData' => $skuData]);
+            Log::info("reference log:",['skuRequest' => $skuRequest]);
             // 🧠 Reuse existing saveOrderDetail logic
             $message = $this->irlOrderDetailService->saveOrderDetail($skuRequest);
             $reference_no = $this->irlOrderDetailService->getReferenceNo();
