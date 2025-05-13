@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class IrlReportSeeder extends Seeder
 {
@@ -13,6 +14,10 @@ class IrlReportSeeder extends Seeder
      */
     public function run()
     {
-        //
+        DB::table('reference_counters')->insert([
+    'prefix' => '2030213',
+    'last_number' => 0,
+]);
+
     }
 }
