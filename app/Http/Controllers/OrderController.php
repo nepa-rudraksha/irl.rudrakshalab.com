@@ -98,7 +98,11 @@ Log::info("reference log:", [
 
     function savePDF(Request $request){
         try{
-        Log::info("reference log:",['reference_no'=>$request]);
+Log::info("reference log:", [
+    'reference_no' => $request->input('reference_no'),
+    'SKU_no' => $request->input('SKU_no'),
+    'has_pdf' => $request->hasFile('pdf')
+]);
         $message = $this->irlOrderDetailService->savePDF($request);
                Log::info("reference log:",['reference_no'=>$request]);
                
