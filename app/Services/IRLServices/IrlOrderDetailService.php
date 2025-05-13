@@ -90,7 +90,9 @@ public function saveOrderDetail($request)
         return "Incomplete data. Please send all of name, phone, email, user_id, and created_by together.";
     }
 
+public function storeBulkOrderDetail($request){
 
+}
 
     
 public function savePDF($request)
@@ -155,22 +157,6 @@ public function savePDF($request)
 
     public function getSkuNo(){
         return $this->SKU_no;
-    }
-
-    public function getQrImg(){
-
-        Log::info("img fails:",['reference_no'=>$this->reference_no]);
-
-        $encryptedString = Crypt::encryptString("{$this->reference_no}|{$this->email}");
-
-        $qrcode = QrCode::size(200)->format('png')->generate('https://irl.rudrakshalab.com/validate-report/' . $encryptedString);
-
-
-
-        return base64_encode((string) $qrcode);
-
-        
-
     }
 
 }

@@ -126,8 +126,47 @@ class OrderController extends Controller
 
         }
     }
-    function storeBulkOrder(Request $request){
-            
+
+
+public function storeBulkOrder(Request $request)
+{
+    try {
+        $request->validate([
+            'skus' => 'required|array',
+            'skus.*.SKU_no' => 'required|string',
+        ]);
+
+        $results = [];
+
+        foreach ($request->skus as $skuData) {
+            // 🔁 Create a new Request instance with current item’s data
+            $skuRequest = new Request($skuData);
+
+            // 🧠 Reuse existing saveOrderDetail logic
+            $message = $this->irlOrderDetailService->saveOrderDetail($skuRequest);
+            $reference_no = $this->irlOrderDetailService->getReferenceNo();
+
+            $results[] = [
+                'SKU_no' => $skuData['SKU_no'],
+                'reference_no' => $reference_no,
+                'message' => $message
+            ];
+        }
+
+        return response()->json([
+            'message' => 'Bulk SKU processing completed.',
+            'data' => $results,
+        ], 200);
+    } catch (Exception $e) {
+        Log::error('Bulk order processing failed', ['error' => $e->getMessage()]);
+
+        return response()->json([
+            'message' => 'Bulk processing error',
+            'success' => false,
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+
     }
     function storeOrderTest(Request $request){
         return response()->json(
