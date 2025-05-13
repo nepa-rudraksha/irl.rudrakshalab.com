@@ -131,14 +131,14 @@ class OrderController extends Controller
 public function storeBulkOrder(Request $request)
 {
     try {
-        $request->validate([
-            'skus' => 'required|array',
-            'skus.*.SKU_no' => 'required|string',
-        ]);
+        $payload = $request->all();
+                if (isset($payload['SKU_no'])) {
+            $payload = [$payload];
+        }
 
         $results = [];
 
-        foreach ($request->skus as $skuData) {
+        foreach ($payload as $skuData) {
             // 🔁 Create a new Request instance with current item’s data
             $skuRequest = new Request($skuData);
 
