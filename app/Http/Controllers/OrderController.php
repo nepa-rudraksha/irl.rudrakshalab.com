@@ -51,7 +51,12 @@ class OrderController extends Controller
         $reference_no = $this->irlOrderDetailService->getReferenceNo();
         
 
-        Log::info("reference log:",['reference_no'=>$reference_no,'request' => $request]);
+Log::info("reference log:", [
+    'reference_no' => $request->input('reference_no'),
+    'SKU_no' => $request->input('SKU_no'),
+    'has_pdf' => $request->hasFile('pdf')
+]);
+
 
         ob_clean();
 
