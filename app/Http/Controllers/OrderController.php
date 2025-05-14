@@ -97,15 +97,15 @@ Log::info("reference log:", [
     }
 
     function savePDF(Request $request){
-Log::info('🟡 REQUEST DUMP START');
+foreach ($request->input('data', []) as $i => $entry) {
+    $pdf = $request->file("data.$i.pdf"); // files come separately
 
-Log::info('request->all:', $request->all());
-Log::info('request->input():', $request->input());
-Log::info('request->post():', $request->post());
-Log::info('request->keys():', $request->keys());
-Log::info('request->allFiles():', $request->allFiles());
-
-Log::info('🟡 REQUEST DUMP END');
+    Log::info("Entry #$i", [
+        'reference_no' => $entry['reference_no'] ?? null,
+        'sku_no'       => $entry['SKU_no'] ?? null,
+        'pdf_attached' => $pdf !== null,
+    ]);
+}
 
 
         try{
