@@ -97,17 +97,10 @@ Log::info("reference log:", [
     }
 
     function savePDF(Request $request){
-Log::info('🟡 REQUEST DUMP START');
-
-Log::info('request->all:', $request->all());
-Log::info('request->input():', $request->input());
-Log::info('request->post():', $request->post());
-Log::info('request->keys():', $request->keys());
-Log::info('request->allFiles():', $request->allFiles());
-
-Log::info('🟡 REQUEST DUMP END');
-
-
+        $data = $request->all();
+                Log::info("reference log:", [
+            'data' => $data
+        ]);
         try{
 
 
