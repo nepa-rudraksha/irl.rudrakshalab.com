@@ -148,8 +148,8 @@ class IrlReport extends Model
         else{
     // Use custom encryption key from .env (must be base64-encoded 32-byte key)
     $base64Key = env('CUSTOM_KEY'); // Example: base64:M0dydVp4aVNTSmR2WlFuY0xLaElDV2FHTVdjQUdCc3k=
-    $key = base64_decode(str_replace('base64:', '', $base64Key));
-    Log::info('🔑 CUSTOM_KEY from env:', [$base64Key]);
+$key = base64_decode(str_replace('base64:', '', config('custom_encryption.key')));
+    Log::info('🔑 CUSTOM_KEY from env:', config('custom_encryption.key'));
 Log::info('🔓 Decoded Key Length:', [strlen($key)]);
     // Create Encrypter instance with custom key and AES-256-CBC cipher
     $encrypter = new Encrypter($key, 'AES-256-CBC');
