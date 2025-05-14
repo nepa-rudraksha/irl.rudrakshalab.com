@@ -97,10 +97,8 @@ Log::info("reference log:", [
     }
 
     function savePDF(Request $request){
-        $data = $request->all();
-                Log::info("reference log:", [
-            'data' => $data
-        ]);
+Log::info('All form keys:', array_keys($request->all()));
+
         try{
 
 
