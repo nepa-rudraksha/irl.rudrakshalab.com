@@ -95,47 +95,62 @@ Log::info("reference log:", [
         }
 
     }
+public function savePDF(Request $request)
+{
+    try {
+        // Determine how many items were submitted
+        $referenceNos = $request->input('reference_no');
+        $skuNos       = $request->input('SKU_no');
+        $pdfs         = $request->file('pdf');
 
-    function savePDF(Request $request){
-        $data = $request->all();
-                Log::info("reference log:", [
-            'data' => $data
+        $count = is_array($referenceNos) ? count($referenceNos) : 0;
+
+        $responses = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $referenceNo = $request->input("reference_no.$i");
+            $skuNo       = $request->input("SKU_no.$i");
+            $pdf         = $request->file("pdf.$i");
+
+            Log::info("📦 Processing item #$i", [
+                'reference_no' => $referenceNo,
+                'sku_no'       => $skuNo,
+                'has_pdf'      => $pdf !== null,
+            ]);
+
+            if (!$referenceNo || !$skuNo || !$pdf) {
+                Log::warning("⚠️ Missing data for item #$i. Skipping.");
+                continue;
+            }
+
+            $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf);
+
+            $responses[] = [
+                'reference_no' => $referenceNo,
+                'sku_no'       => $skuNo,
+                'message'      => $message,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bulk PDF processed successfully.',
+            'data' => $responses,
+        ], 200);
+
+    } catch (Exception $e) {
+        Log::error('❌ Error processing bulk PDF upload', [
+            'message' => $e->getMessage(),
         ]);
-        try{
 
-
-        $message = $this->irlOrderDetailService->savePDF($request);
-               Log::info("reference log:",['reference_no'=>$request]);
-               
-        ob_clean();
-                return response()->json(
-
-            [
-
-                'message' => $message,
-
-            ]
-
-            , 200);
-        }
-               catch(Exception $e){
-
-            Log::error('Error sending data to API', ['message' => $e->getMessage()]);
-
-
-
-            return response()->json([
-
-                'message' => 'An error occurred while sending data.',
-
-                'success' => false,
-
-                'error' => $e->getMessage(),
-
-            ], 500);
-
-        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error occurred while processing PDFs.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 
 
 public function storeBulkOrder(Request $request)
@@ -204,65 +219,65 @@ public function storeBulkOrder(Request $request)
 
     }
 
-    public function storePDF(Request $request){
-{
-    try {
-        $payload = $request->all();
+//     public function storePDF(Request $request){
+// {
+//     try {
+//         $payload = $request->all();
 
-        // Normalize single item to array
-        if (isset($payload['SKU_no']) && isset($payload['pdf'])) {
-            $payload = [$payload];
-        }
+//         // Normalize single item to array
+//         if (isset($payload['SKU_no']) && isset($payload['pdf'])) {
+//             $payload = [$payload];
+//         }
 
-        $results = [];
+//         $results = [];
 
-        foreach ($payload as $index => $item) {
-            // Check for required fields
-            if (!isset($item['SKU_no'], $item['reference_no'], $item['pdf'])) {
-                $results[] = [
-                    'index' => $index,
-                    'status' => 'error',
-                    'message' => 'Missing SKU_no, reference_no or PDF file'
-                ];
-                continue;
-            }
+//         foreach ($payload as $index => $item) {
+//             // Check for required fields
+//             if (!isset($item['SKU_no'], $item['reference_no'], $item['pdf'])) {
+//                 $results[] = [
+//                     'index' => $index,
+//                     'status' => 'error',
+//                     'message' => 'Missing SKU_no, reference_no or PDF file'
+//                 ];
+//                 continue;
+//             }
 
-            // Create a mock request object to pass to service
-            $itemRequest = new Request([
-                'SKU_no' => $item['SKU_no'],
-                'reference_no' => $item['reference_no'],
-            ]);
+//             // Create a mock request object to pass to service
+//             $itemRequest = new Request([
+//                 'SKU_no' => $item['SKU_no'],
+//                 'reference_no' => $item['reference_no'],
+//             ]);
 
-            // Attach the file manually
-            $itemRequest->files->set('pdf', $item['pdf']);
+//             // Attach the file manually
+//             $itemRequest->files->set('pdf', $item['pdf']);
 
-            // Call service method
-            $message = $this->irlOrderDetailService->savePDF($itemRequest);
+//             // Call service method
+//             $message = $this->irlOrderDetailService->savePDF($itemRequest);
 
-            $results[] = [
-                'index' => $index,
-                'SKU_no' => $item['SKU_no'],
-                'reference_no' => $item['reference_no'],
-                'status' => 'success',
-                'message' => $message
-            ];
-        }
+//             $results[] = [
+//                 'index' => $index,
+//                 'SKU_no' => $item['SKU_no'],
+//                 'reference_no' => $item['reference_no'],
+//                 'status' => 'success',
+//                 'message' => $message
+//             ];
+//         }
 
-        return response()->json([
-            'message' => 'PDF processing complete.',
-            'results' => $results
-        ], 200);
+//         return response()->json([
+//             'message' => 'PDF processing complete.',
+//             'results' => $results
+//         ], 200);
 
-    } catch (\Exception $e) {
-        Log::error('Bulk PDF Store Failed', ['error' => $e->getMessage()]);
+//     } catch (\Exception $e) {
+//         Log::error('Bulk PDF Store Failed', ['error' => $e->getMessage()]);
 
-        return response()->json([
-            'message' => 'PDF upload failed.',
-            'success' => false,
-            'error' => $e->getMessage()
-        ], 500);
-    }
-    }
+//         return response()->json([
+//             'message' => 'PDF upload failed.',
+//             'success' => false,
+//             'error' => $e->getMessage()
+//         ], 500);
+//     }
+//     }
 
-}
+// }
 }
