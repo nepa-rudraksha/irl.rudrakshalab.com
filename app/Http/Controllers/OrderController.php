@@ -158,23 +158,31 @@ public function storeBulkOrder(Request $request)
     try {
         $payload = $request->all();
 
-                if (isset($payload['SKU_no'])) {
-
+        // ✅ Normalize input to array of objects
+        if (isset($payload['SKU_no'])) {
+            // Single object like {"SKU_no":"D100"} => wrap into array
             $payload = [$payload];
+        } elseif (array_keys($payload) === range(0, count($payload) - 1)) {
+            // It's already a sequential array — do nothing
+        } else {
+            // Convert numeric-keyed object to array
+            $payload = array_values($payload);
         }
-            Log::info("reference log:",['payload' => $payload]);
+
+        Log::info("reference log: payload normalized", ['payload' => $payload]);
+
         $results = [];
 
         foreach ($payload as $skuData) {
             // 🔁 Create a new Request instance with current item’s data
             $skuRequest = new Request($skuData);
-            Log::info("reference log:",['skuRequest' => $skuRequest]);
+
             // 🧠 Reuse existing saveOrderDetail logic
             $message = $this->irlOrderDetailService->saveOrderDetail($skuRequest);
             $reference_no = $this->irlOrderDetailService->getReferenceNo();
 
             $results[] = [
-                'SKU_no' => $skuData['SKU_no'],
+                'SKU_no' => $skuData['SKU_no'] ?? null,
                 'reference_no' => $reference_no,
                 'message' => $message
             ];
@@ -184,6 +192,7 @@ public function storeBulkOrder(Request $request)
             'message' => 'Bulk SKU processing completed.',
             'data' => $results,
         ], 200);
+
     } catch (Exception $e) {
         Log::error('Bulk order processing failed', ['error' => $e->getMessage()]);
 
@@ -193,8 +202,8 @@ public function storeBulkOrder(Request $request)
             'error' => $e->getMessage(),
         ], 500);
     }
+}
 
-    }
     function storeOrderTest(Request $request){
         return response()->json(
 
