@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
+use Illuminate\Http\UploadedFile;
 
 
 class IrlOrderDetailService implements IrlOrderDetailInterface
@@ -95,7 +96,7 @@ public function storeBulkOrderDetail($request){
 }
 
     
-public function savePDF($request)
+public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf)
 {
 
 //     try {
@@ -145,36 +146,32 @@ public function savePDF($request)
 //             'success' => false
 //         ], 500);
 //     }
-  // Step 1: Validate the input
-    $validated = $request->validate([
-        'SKU_no' => 'required|string',
-        'reference_no' => 'required|string|exists:irl_reports,reference_no',
-        'pdf' => 'required|file|mimes:pdf|max:10240', // max 10MB
-    ]);
-
-    // Step 2: Match SKU and reference_no in DB
-    $record = IrlReport::where('SKU_no', $request->SKU_no)
-                ->where('reference_no', $request->reference_no)
+  // Step 1: Match SKU and reference_no in DB
+    $record = IrlReport::where('SKU_no', $skuNo)
+                ->where('reference_no', $referenceNo)
                 ->first();
 
     if (!$record) {
-        return 'SKU and Reference number do not match or record not found.';
+        return '❌ SKU and Reference number do not match or record not found.';
     }
 
-    // Step 3: Store PDF
+    // Step 2: Store PDF
     try {
-        $file = $request->file('pdf');
-        $filename = (string) Str::uuid() . '_' . $request->reference_no . '.' . $file->getClientOriginalExtension();
-        $file->storeAs('report', $filename);
+        $filename = (string) Str::uuid() . '_' . $referenceNo . '.' . $pdf->getClientOriginalExtension();
+        $pdf->storeAs('report', $filename); // You can also specify disk: ->storeAs('report', $filename, 'public')
 
-        // Step 4: Save PDF path in DB
+        // Step 3: Save PDF path in DB
         $record->pdf_url = $filename;
         $record->save();
 
-        return 'PDF uploaded and linked successfully.';
+        return '✅ PDF uploaded and linked successfully.';
     } catch (\Exception $ex) {
-        Log::error('PDF Upload Error', ['error' => $ex->getMessage()]);
-        return 'Something went wrong while uploading the PDF.';
+        Log::error('PDF Upload Error', [
+            'reference_no' => $referenceNo,
+            'SKU_no'       => $skuNo,
+            'error'        => $ex->getMessage()
+        ]);
+        return '❌ Something went wrong while uploading the PDF.';
     }
 }
 
