@@ -42,8 +42,6 @@ public function saveOrderDetail($request)
         } else {
             $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
         }
-
-        Log::info("order:",['order'=>$order]);
         // If not found, create a new instance
         if (!$order) {
             Log::info("order fail:",['order'=>$order]);
