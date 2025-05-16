@@ -180,6 +180,31 @@ try {
 
 }
 
+// App\Services\IRLServices\IrlOrderDetailService.php
+
+// App\Http\Controllers\OrderController.php
+
+public function deleteOrderDetail(Request $request)
+{
+    try {
+        $message = $this->irlOrderDetailService->deselectOrderDetail($request);
+
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+        ]);
+    } catch (\Exception $e) {
+        Log::error('❌ Error in deleteOrderDetail', [
+            'error' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while deselecting order detail.',
+        ], 500);
+    }
+}
+
 
 
 public function storeBulkOrder(Request $request)
