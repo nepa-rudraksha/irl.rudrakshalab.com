@@ -173,6 +173,34 @@ public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf)
     }
 }
 
+// App\Services\IRLServices\IrlOrderDetailService.php
+
+public function deselectOrderDetail($request)
+{
+    $skuNo   = $request->input('SKU_no');
+    $irlNo   = $request->input('irl_no');
+    $orderId = $request->input('order_id');
+
+    $record = IrlReport::where('SKU_no', $skuNo)
+        ->where('reference_no', $irlNo)
+        ->where('order_id', $orderId)
+        ->first();
+
+    if (!$record) {
+        return 'No matching record found.';
+    }
+
+    $record->order_id   = null;
+    $record->name       = null;
+    $record->phone      = null;
+    $record->email      = null;
+    $record->created_by = null;
+    $record->user_id    = null;
+    $record->save();
+
+    return 'Fields deselected successfully.';
+}
+
     public function getReferenceNo()
 
     {
