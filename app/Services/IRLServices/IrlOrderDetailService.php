@@ -177,7 +177,7 @@ public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf)
 public function deselectOrderDetail($request)
 {
     $skuNo   = $request->input('SKU_no');
-    $irlNo   = $request->input('irl_no');
+    $irlNo   = $request->input('reference_no');
     $orderId = $request->input('order_id');
 
     $record = IrlReport::where('SKU_no', $skuNo)
