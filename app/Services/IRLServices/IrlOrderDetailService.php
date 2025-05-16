@@ -54,9 +54,9 @@ public function saveOrderDetail($request)
 
         // Case 1: Only SKU_no received (initial creation)
         if (
-            !$request->name && !$request->phone &&
+            !$request->name &&
             !$request->email  &&
-            !$request->created_by
+            !$request->created_by && !$request->order_id
         ) {
             Log::info("sku only order:",['order'=>$order]);
             $order->status = IrlReport::PUBLISHED;
@@ -68,14 +68,15 @@ public function saveOrderDetail($request)
 
         // Case 2: Full data received — must validate ALL required fields
         if (
-            $request->name && $request->phone &&
+            $request->name &&
             $request->email &&
-            $request->created_by
+            $request->created_by && $request->order_id
         ) {
             Log::info("whole data order:",['order'=>$order]);
             $order->name       = $request->name;
             $order->phone      = $request->phone;
             $order->email      = $request->email;
+            $order->order_id    = $request->order_id;
             $this->email = $request->email;
             $this->reference_no = $request->reference_no??$this->reference_no;
             $order->created_by = $request->created_by;
