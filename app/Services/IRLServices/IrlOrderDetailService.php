@@ -55,7 +55,7 @@ public function saveOrderDetail($request)
         // Case 1: Only SKU_no received (initial creation)
         if (
             !$request->name && !$request->phone &&
-            !$request->email && !$request->user_id &&
+            !$request->email  &&
             !$request->created_by
         ) {
             Log::info("sku only order:",['order'=>$order]);
@@ -69,7 +69,7 @@ public function saveOrderDetail($request)
         // Case 2: Full data received — must validate ALL required fields
         if (
             $request->name && $request->phone &&
-            $request->email && $request->user_id &&
+            $request->email &&
             $request->created_by
         ) {
             Log::info("whole data order:",['order'=>$order]);
@@ -77,7 +77,6 @@ public function saveOrderDetail($request)
             $order->phone      = $request->phone;
             $order->email      = $request->email;
             $this->email = $request->email;
-            $order->user_id    = $request->user_id;
             $order->created_by = $request->created_by;
             // $order->status     = IrlReport::PUBLISHED;
             $order->created_at = now();
@@ -86,7 +85,7 @@ public function saveOrderDetail($request)
         }
 
         // Case 3: Partial data — reject
-        return "Incomplete data. Please send all of name, phone, email, user_id, and created_by together.";
+        return "Incomplete data. Please send all of name, phone, email, and created_by together.";
     }
 
 public function storeBulkOrderDetail($request){
@@ -195,7 +194,6 @@ public function deselectOrderDetail($request)
     $record->phone      = null;
     $record->email      = null;
     $record->created_by = null;
-    $record->user_id    = null;
     $record->save();
 
     return 'Fields deselected successfully.';
