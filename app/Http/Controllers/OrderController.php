@@ -183,8 +183,6 @@ try {
     $skuNos       = $request->input('SKU_no')??"";
     $pdfs         = $request->file('pdf');
     $order_ids  = $request->input('order_id')??"";
-    $singleOrderId = $
-    $responses = [];
 
     // Determine if it's a bulk array or a single file upload
     if (is_array($pdfs)) {
