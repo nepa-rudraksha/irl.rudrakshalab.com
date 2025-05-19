@@ -27,6 +27,7 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
 
     protected $email="";
     protected $SKU_no="";
+    protected $order_id="";
 
     
 
@@ -95,7 +96,7 @@ public function storeBulkOrderDetail($request){
 }
 
     
-public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf)
+public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf,string $order_id)
 {
 
 //     try {
@@ -151,19 +152,20 @@ public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf)
                 ->first();
 
     if (!$record) {
-        return '❌ SKU and Reference number do not match or record not found.';
+        return $this->savePDFTemp($order_id,$pdf);;
     }
 
     // Step 2: Store PDF
     try {
         $filename = (string) Str::uuid() . '_' . $referenceNo . '.' . $pdf->getClientOriginalExtension();
-        $pdf->storeAs('report', $filename); // You can also specify disk: ->storeAs('report', $filename, 'public')
+        $pdf->storeAs('report', $filename,'public'); // You can also specify disk: ->storeAs('report', $filename, 'public')
 
         // Step 3: Save PDF path in DB
         $record->pdf_url = $filename;
+        $this->order_id = $record->order_id??"";
         $record->save();
-
-        return '✅ PDF uploaded and linked successfully.';
+     $url = Storage::disk('public')->url('report/' . $filename);
+        return $url;
     } catch (\Exception $ex) {
         Log::error('PDF Upload Error', [
             'reference_no' => $referenceNo,
@@ -231,7 +233,15 @@ function savePDFTemp($order_no,$pdf){
         return '❌ Something went wrong while uploading the PDF.';
     }
 }
+function getOrderId(){
+    return $this->order_id;
 }
+function getEmail(){
+    return $this->email;
+}
+}
+
+
 
 
 ?>
