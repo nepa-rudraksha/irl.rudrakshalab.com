@@ -209,7 +209,7 @@ try {
             }
 
             $url = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
-            $order_id = $this->irlOrderDetailService->getOrderId();
+            $order_id = $order_id;
 
             $responses[] = [
                 'order_id' => $order_id,
