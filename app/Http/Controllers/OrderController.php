@@ -179,10 +179,10 @@ function PDFTemp(Request $request){
 public function savePDF(Request $request)
 {
 try {
-    $referenceNos = $request->input('reference_no')??null;
-    $skuNos       = $request->input('SKU_no')??null;
+    $referenceNos = $request->input('reference_no')??"";
+    $skuNos       = $request->input('SKU_no')??"";
     $pdfs         = $request->file('pdf');
-    $order_id  = $request->input('order_id')??null;
+    $order_id  = $request->input('order_id')??"";
 
     $responses = [];
 
@@ -191,13 +191,13 @@ try {
         $count = count($pdfs);
 
         for ($i = 0; $i < $count; $i++) {
-            $referenceNo = $request->input("reference_no.$i")??null;
-            $skuNo       = $request->input("SKU_no.$i")??null;
+            $referenceNo = $request->input("reference_no.$i")??"";
+            $skuNo       = $request->input("SKU_no.$i")??"";
             $pdf         = $request->file("pdf.$i");
 
             Log::info("📦 Processing item #$i", [
-                'reference_no' => $referenceNo??null,
-                'sku_no'       => $skuNo??null,
+                'reference_no' => $referenceNo??"",
+                'sku_no'       => $skuNo??"",
                 'has_pdf'      => $pdf !== null,
             ]);
 
