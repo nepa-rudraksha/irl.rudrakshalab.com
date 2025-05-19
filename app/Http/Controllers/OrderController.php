@@ -183,7 +183,7 @@ try {
     $skuNos       = $request->input('SKU_no')??"";
     $pdfs         = $request->file('pdf');
     $order_ids  = $request->input('order_id')??"";
-
+    $singleOrderId = $
     $responses = [];
 
     // Determine if it's a bulk array or a single file upload
@@ -194,7 +194,7 @@ try {
             $referenceNo = $request->input("reference_no.$i")??"";
             $skuNo       = $request->input("SKU_no.$i")??"";
             $pdf         = $request->file("pdf.$i");
-            $order_id   = $request->input("order_id.$i")??"";
+            $order_id   = $request->order_id??"";
 
 
             Log::info("📦 Processing item #$i", [
