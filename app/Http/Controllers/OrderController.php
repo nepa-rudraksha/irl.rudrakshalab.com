@@ -182,7 +182,7 @@ try {
     $referenceNos = $request->input('reference_no')??"";
     $skuNos       = $request->input('SKU_no')??"";
     $pdfs         = $request->file('pdf');
-    $order_id  = $request->input('order_id')??"";
+    $order_ids  = $request->input('order_id')??"";
 
     $responses = [];
 
@@ -194,6 +194,8 @@ try {
             $referenceNo = $request->input("reference_no.$i")??"";
             $skuNo       = $request->input("SKU_no.$i")??"";
             $pdf         = $request->file("pdf.$i");
+            $order_id   = $request->input("order_id.$i")??"";
+
 
             Log::info("📦 Processing item #$i", [
                 'reference_no' => $referenceNo??"",
