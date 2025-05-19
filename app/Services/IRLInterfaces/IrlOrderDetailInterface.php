@@ -11,7 +11,6 @@ interface IrlOrderDetailInterface{
     public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf);
     public function deselectOrderDetail($request);
     public function savePDFTemp($order_no,$pdf);
-
 }
 
 ?>

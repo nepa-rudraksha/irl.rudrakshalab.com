@@ -174,26 +174,6 @@ public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf)
     }
 }
 
-function savePDFTemp($order_no,$pdf){
-    $url = "";
-    // Step 2: Store PDF
-    try {
-        $filename = (string) Str::uuid() . '.' . $pdf->getClientOriginalExtension();
-
-        $pdf->storeAs('report', $filename,'public'); // You can also specify disk: ->storeAs('report', $filename, 'public')
-        $url = Storage::disk('public')->url('report/' . $filename);
-
-
-        return $url;
-    } catch (\Exception $ex) {
-        Log::error('PDF Upload Error', [
-            'url' => $url,
-            'error'        => $ex->getMessage()
-        ]);
-        return '❌ Something went wrong while uploading the PDF.';
-    }
-}
-
 // App\Services\IRLServices\IrlOrderDetailService.php
 
 public function deselectOrderDetail($request)
@@ -232,9 +212,26 @@ public function deselectOrderDetail($request)
     public function getSkuNo(){
         return $this->SKU_no;
     }
+function savePDFTemp($order_no,$pdf){
+    $url = "";
+    // Step 2: Store PDF
+    try {
+        $filename = (string) Str::uuid() . '.' . $pdf->getClientOriginalExtension();
 
+        $pdf->storeAs('report', $filename,'public'); // You can also specify disk: ->storeAs('report', $filename, 'public')
+        $url = Storage::disk('public')->url('report/' . $filename);
+
+
+        return $url;
+    } catch (\Exception $ex) {
+        Log::error('PDF Upload Error', [
+            'url' => $url,
+            'error'        => $ex->getMessage()
+        ]);
+        return '❌ Something went wrong while uploading the PDF.';
+    }
 }
-
+}
 
 
 ?>
