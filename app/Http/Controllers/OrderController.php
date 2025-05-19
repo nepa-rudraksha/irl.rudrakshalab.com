@@ -132,6 +132,8 @@ function PDFTemp(Request $request){
         $referenceNo = $request->input('reference_no');
         $skuNo       = $request->input('SKU_no');
         $pdf         = $request->file('pdf');
+        $order_id  = $request->input('order_id')??null;
+
 
         Log::info("📦 Processing single item", [
             'reference_no' => $referenceNo,
@@ -146,7 +148,7 @@ function PDFTemp(Request $request){
             ], 422);
         }
 
-        $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf);
+        $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
 
         $responses[] = [
             'reference_no' => $referenceNo,
@@ -177,38 +179,40 @@ function PDFTemp(Request $request){
 public function savePDF(Request $request)
 {
 try {
-    $referenceNos = $request->input('reference_no');
-    $skuNos       = $request->input('SKU_no');
+    $referenceNos = $request->input('reference_no')??null;
+    $skuNos       = $request->input('SKU_no')??null;
     $pdfs         = $request->file('pdf');
+    $order_id  = $request->input('order_id')??null;
 
     $responses = [];
 
     // Determine if it's a bulk array or a single file upload
-    if (is_array($referenceNos)) {
-        $count = count($referenceNos);
+    if (is_array($pdfs)) {
+        $count = count($pdfs);
 
         for ($i = 0; $i < $count; $i++) {
-            $referenceNo = $request->input("reference_no.$i");
-            $skuNo       = $request->input("SKU_no.$i");
+            $referenceNo = $request->input("reference_no.$i")??null;
+            $skuNo       = $request->input("SKU_no.$i")??null;
             $pdf         = $request->file("pdf.$i");
 
             Log::info("📦 Processing item #$i", [
-                'reference_no' => $referenceNo,
-                'sku_no'       => $skuNo,
+                'reference_no' => $referenceNo??null,
+                'sku_no'       => $skuNo??null,
                 'has_pdf'      => $pdf !== null,
             ]);
 
-            if (!$referenceNo || !$skuNo || !$pdf) {
+            if (!$pdf) {
                 Log::warning("⚠️ Missing data for item #$i. Skipping.");
                 continue;
             }
 
-            $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf);
+            $url = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
+            $order_id = $this->irlOrderDetailService->getOrderId();
 
             $responses[] = [
-                'reference_no' => $referenceNo,
-                'sku_no'       => $skuNo,
-                'message'      => $message,
+                'order_id' => $order_id,
+                'url' => $url,
+                'message'      => "PDF processed successfully.",
             ];
         }
     } else {
@@ -223,7 +227,7 @@ try {
             'has_pdf'      => $pdf !== null,
         ]);
 
-        if (!$referenceNo || !$skuNo || !$pdf) {
+        if (!$pdf) {
             return response()->json([
                 'success' => false,
                 'message' => 'Missing required fields.',
