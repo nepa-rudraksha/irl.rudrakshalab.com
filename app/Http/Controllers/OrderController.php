@@ -95,7 +95,7 @@ Log::info("reference log:", [
         }
 
     }
-function PDFTemp($request){
+function PDFTemp(Request $request){
     try {
     $order_no = $request->input('order_no');
     $pdfs   = $request->file('pdf');
