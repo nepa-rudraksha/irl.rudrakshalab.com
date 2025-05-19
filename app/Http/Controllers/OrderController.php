@@ -179,6 +179,84 @@ try {
 }
 
 }
+function PDFTemp($request){
+    try {
+    $order_no = $request->input('order_no');
+    $pdfs   = $request->file('pdf');
+
+    $responses = [];
+
+    // Determine if it's a bulk array or a single file upload
+    if (is_array($order_no)) {
+        $count = count($order_no);
+
+        for ($i = 0; $i < $count; $i++) {
+            $order_nos = $request->input("order_no.$i");
+            $pdfs         = $request->file("pdf.$i");
+
+            Log::info("📦 Processing item #$i", [
+                'order_no' => $order_nos,
+                'has_pdf'      => $pdfs !== null,
+            ]);
+
+            if (!$order_nos || !$pdfs) {
+                Log::warning("⚠️ Missing data for item #$i. Skipping.");
+                continue;
+            }
+
+            $url = $this->irlOrderDetailService->savePDFTemp($order_nos, $pdfs);
+
+            $responses[] = [
+                'reference_no' => $order_nos,
+                'url' => $url,
+            ];
+        }
+    } else {
+        // Handle single item
+        $referenceNo = $request->input('reference_no');
+        $skuNo       = $request->input('SKU_no');
+        $pdf         = $request->file('pdf');
+
+        Log::info("📦 Processing single item", [
+            'reference_no' => $referenceNo,
+            'sku_no'       => $skuNo,
+            'has_pdf'      => $pdf !== null,
+        ]);
+
+        if (!$referenceNo || !$skuNo || !$pdf) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Missing required fields.',
+            ], 422);
+        }
+
+        $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf);
+
+        $responses[] = [
+            'reference_no' => $referenceNo,
+            'sku_no'       => $skuNo,
+            'message'      => $message,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'PDF(s) processed successfully.',
+        'data' => $responses,
+    ], 200);
+
+} catch (Exception $e) {
+    Log::error('❌ Error processing PDF upload', [
+        'message' => $e->getMessage(),
+    ]);
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Error occurred while processing PDFs.',
+        'error' => $e->getMessage(),
+    ], 500);
+}
+}
 
 // App\Services\IRLServices\IrlOrderDetailService.php
 
