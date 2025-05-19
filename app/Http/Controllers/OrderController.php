@@ -106,7 +106,7 @@ function PDFTemp(Request $request){
     if (is_array($order_no)) {
         $count = count($order_no);
 
-        for ($i = 0; $i < $count; $i) {
+        for ($i = 0; $i < $count; $i++) {
             $order_nos = $request->input("order_no.$i");
             $pdfs         = $request->file("pdf.$i");
 
