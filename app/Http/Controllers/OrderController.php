@@ -123,7 +123,7 @@ function PDFTemp(Request $request){
             $url = $this->irlOrderDetailService->savePDFTemp($order_nos, $pdfs);
 
             $responses[] = [
-                'reference_no' => $order_nos,
+                'order_no' => $order_nos,
                 'url' => $url,
             ];
         }
