@@ -37,7 +37,7 @@ Route::post('/receive-order-test',[OrderController::class,'storeOrderTest'])->na
 Route::post('/publish-qr',[OrderController::class,'publishOrder'])->name('api.publish-order')->withoutMiddleware(['auth','throttle']);
 
 Route::post('/save-pdf',[OrderController::class,'savePDF'])->name('api.save-pdf')->withoutMiddleware(['auth','throttle']);
-Route::post('/save-temp-pdf',[OrderController::class,'PDFTemp'])->name('api.save-temp-pdf')->withoutMiddleware(['auth','throttle']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
     return $request->user();
