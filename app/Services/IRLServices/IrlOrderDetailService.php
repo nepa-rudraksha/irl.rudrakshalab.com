@@ -79,7 +79,7 @@ public function saveOrderDetail($request)
             $order->email      = $request->email;
             $order->order_id    = $request->order_id;
             $this->email = $request->email;
-            $this->reference_no = $request->reference_no??$this->reference_no;
+            $this->reference_no = $request->reference_no??$order->reference_no;
             $order->created_by = $request->created_by;
             // $order->status     = IrlReport::PUBLISHED;
             $order->created_at = now();
