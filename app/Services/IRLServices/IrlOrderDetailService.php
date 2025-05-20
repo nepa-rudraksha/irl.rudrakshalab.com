@@ -3,20 +3,10 @@
 namespace App\Services\IRLServices;
 
 use App\Models\IrlReport;
-
-use Carbon\Carbon;
-
 use App\Services\IRLInterfaces\IrlOrderDetailInterface;
-
-use Illuminate\Support\Facades\Crypt;
-
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Livewire\WithFileUploads;
-use Illuminate\Http\UploadedFile;
+
+
 
 
 class IrlOrderDetailService implements IrlOrderDetailInterface
@@ -95,39 +85,6 @@ public function saveOrderDetail($request)
         return "Incomplete data. Please send all of name, phone, email, and created_by together.";
     }
 
-    
-public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf,string $order_id)
-{
-  // Step 1: Match SKU and reference_no in DB
-    $record = IrlReport::where('SKU_no', $skuNo)
-                ->where('reference_no', $referenceNo)
-                ->first();
-        $this->order_id = $record->order_id??$order_id??"";
-    if (!$record) {
-        return $this->savePDFTemp($order_id,$pdf);;
-    }
-
-    // Step 2: Store PDF
-    try {
-        $filename = (string) Str::uuid() . '_' . $referenceNo . '.' . $pdf->getClientOriginalExtension();
-        $pdf->storeAs('report', $filename,'public'); // You can also specify disk: ->storeAs('report', $filename, 'public')
-
-        // Step 3: Save PDF path in DB
-        $record->pdf_url = $filename;
-
-        $record->save();
-     $url = Storage::disk('public')->url('report/' . $filename);
-        return $url;
-    } catch (\Exception $ex) {
-        Log::error('PDF Upload Error', [
-            'reference_no' => $referenceNo,
-            'SKU_no'       => $skuNo,
-            'error'        => $ex->getMessage()
-        ]);
-        return '❌ Something went wrong while uploading the PDF.';
-    }
-}
-
 // App\Services\IRLServices\IrlOrderDetailService.php
 
 public function deselectOrderDetail($request)
@@ -166,28 +123,8 @@ public function deselectOrderDetail($request)
     public function getSkuNo(){
         return $this->SKU_no;
     }
-function savePDFTemp($order_no,$pdf){
-    $url = "";
-    // Step 2: Store PDF
-    try {
-        $filename = (string) Str::uuid() . '.' . $pdf->getClientOriginalExtension();
-
-        $pdf->storeAs('report', $filename,'public'); // You can also specify disk: ->storeAs('report', $filename, 'public')
-        $url = Storage::disk('public')->url('report/' . $filename);
 
 
-        return $url;
-    } catch (\Exception $ex) {
-        Log::error('PDF Upload Error', [
-            'url' => $url,
-            'error'        => $ex->getMessage()
-        ]);
-        return '❌ Something went wrong while uploading the PDF.';
-    }
-}
-function getOrderId(){
-    return $this->order_id;
-}
 function getEmail(){
     return $this->email;
 }
