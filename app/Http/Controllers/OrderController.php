@@ -12,6 +12,8 @@ use App\Services\IRLInterfaces\IrlQrInterface;
 
 use Illuminate\Support\Facades\Log;
 
+use App\Services\IRLInterfaces\IrlPdfInterface;
+
 use Exception;
 
 
@@ -20,19 +22,17 @@ class OrderController extends Controller
 
 {
 
-    protected IrlQrInterface $irlQrService;
+    protected IrlPdfInterface $irlPdfService;
 
     protected IrlOrderDetailInterface $irlOrderDetailService;
 
-    public function __construct(IrlQrInterface $irlQrService,IrlOrderDetailInterface $irlOrderDetailService)
+    public function __construct(IrlOrderDetailInterface $irlOrderDetailService, IrlPdfInterface $irlPdfService)
 
     {
 
-        $this->irlQrService = $irlQrService;
-
         $this->irlOrderDetailService = $irlOrderDetailService;
 
-
+        $this->irlPdfService = $irlPdfService;
 
     }
 
@@ -40,22 +40,18 @@ class OrderController extends Controller
 
     {
 
-        
-
         try{
-
-
 
         $message = $this->irlOrderDetailService->saveOrderDetail($request);
 
         $reference_no = $this->irlOrderDetailService->getReferenceNo();
         
 
-Log::info("reference log:", [
-    'reference_no' => $request->input('reference_no'),
-    'SKU_no' => $request->input('SKU_no'),
-    'has_pdf' => $request->hasFile('pdf')
-]);
+        Log::info("reference log:", [
+            'reference_no' => $request->input('reference_no'),
+            'SKU_no' => $request->input('SKU_no'),
+            'has_pdf' => $request->hasFile('pdf')
+        ]);
 
 
         ob_clean();
@@ -95,86 +91,6 @@ Log::info("reference log:", [
         }
 
     }
-function PDFTemp(Request $request){
-    try {
-    $order_no = $request->input('order_no');
-    $pdfs   = $request->file('pdf');
-
-    $responses = [];
-
-    // Determine if it's a bulk array or a single file upload
-    if (is_array($order_no)) {
-        $count = count($order_no);
-
-        for ($i = 0; $i < $count; $i++) {
-            $order_nos = $request->input("order_no.$i");
-            $pdfs         = $request->file("pdf.$i");
-
-            Log::info("📦 Processing item #$i", [
-                'order_no' => $order_nos,
-                'has_pdf'      => $pdfs !== null,
-            ]);
-
-            if (!$order_nos || !$pdfs) {
-                Log::warning("⚠️ Missing data for item #$i. Skipping.");
-                continue;
-            }
-
-            $url = $this->irlOrderDetailService->savePDFTemp($order_nos, $pdfs);
-
-            $responses[] = [
-                'order_no' => $order_nos,
-                'url' => $url,
-            ];
-        }
-    } else {
-        // Handle single item
-        $referenceNo = $request->input('reference_no');
-        $skuNo       = $request->input('SKU_no');
-        $pdf         = $request->file('pdf');
-        $order_id  = $request->input('order_id')??null;
-
-
-        Log::info("📦 Processing single item", [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'has_pdf'      => $pdf !== null,
-        ]);
-
-        if (!$referenceNo || !$skuNo || !$pdf) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Missing required fields.',
-            ], 422);
-        }
-
-        $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
-
-        $responses[] = [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'message'      => $message,
-        ];
-    }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'PDF(s) processed successfully.',
-        'data' => $responses,
-    ], 200);
-
-} catch (Exception $e) {
-    Log::error('❌ Error processing PDF upload', [
-        'message' => $e->getMessage(),
-    ]);
-
-    return response()->json([
-        'success' => false,
-        'message' => 'Error occurred while processing PDFs.',
-        'error' => $e->getMessage(),
-    ], 500);
-}
- }
 
 public function savePDF(Request $request)
 {
@@ -206,8 +122,8 @@ try {
                 continue;
             }
 
-            $url = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
-            $order_id = $this->irlOrderDetailService->getOrderId();
+            $url = $this->irlPdfService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
+            $order_id = $this->irlPdfService->getOrderId();
 
             $responses[] = [
                 'order_id' => $order_id,
@@ -215,34 +131,7 @@ try {
                 'message'      => "PDF processed successfully.",
             ];
         }
-    } else {
-        // Handle single item
-        $referenceNo = $request->input('reference_no');
-        $skuNo       = $request->input('SKU_no');
-        $pdf         = $request->file('pdf');
-
-        Log::info("📦 Processing single item", [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'has_pdf'      => $pdf !== null,
-        ]);
-
-        if (!$pdf) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Missing required fields.',
-            ], 422);
-        }
-
-        $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf);
-
-        $responses[] = [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'message'      => $message,
-        ];
     }
-
     return response()->json([
         'success' => true,
         'message' => 'PDF(s) processed successfully.',
@@ -345,14 +234,4 @@ public function storeBulkOrder(Request $request)
             , 200);
 
         }
-    
-    public function publishOrder(Request $request)
-
-    {
-
-        $reference_no = $request->reference_no;
-
-        return response()->json(['message' => $this->irlQrService->publishOrder($reference_no)], 200);
-
-    }
 }
