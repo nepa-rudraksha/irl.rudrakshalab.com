@@ -39,6 +39,9 @@ public function saveOrderDetail($request)
             $order = IrlReport::where('SKU_no', $request->SKU_no)
                             ->where('reference_no', $request->reference_no)
                             ->first();
+            if(!$order){
+                return "Reference Number for SKU Number:".$request->SKU_no."Doesn't match";
+            }
 
         } else {
             $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
