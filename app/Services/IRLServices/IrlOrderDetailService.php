@@ -102,7 +102,7 @@ public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf,st
     $record = IrlReport::where('SKU_no', $skuNo)
                 ->where('reference_no', $referenceNo)
                 ->first();
-
+        $this->order_id = $record->order_id??$order_id??"";
     if (!$record) {
         return $this->savePDFTemp($order_id,$pdf);;
     }
@@ -114,7 +114,7 @@ public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf,st
 
         // Step 3: Save PDF path in DB
         $record->pdf_url = $filename;
-        $this->order_id = $record->order_id??"";
+
         $record->save();
      $url = Storage::disk('public')->url('report/' . $filename);
         return $url;
