@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 
-
 use App\Services\IRLInterfaces\IrlOrderDetailInterface;
+
+use App\Services\IRLInterfaces\IrlPdfInterface;
 
 use Illuminate\Http\Request;
 
@@ -15,7 +16,6 @@ use Illuminate\Support\Facades\Log;
 use Exception;
 
 
-
 class OrderController extends Controller
 
 {
@@ -24,7 +24,9 @@ class OrderController extends Controller
 
     protected IrlOrderDetailInterface $irlOrderDetailService;
 
-    public function __construct(IrlQrInterface $irlQrService,IrlOrderDetailInterface $irlOrderDetailService)
+    protected IrlPdfInterface $irlPdfService;
+
+    public function __construct(IrlQrInterface $irlQrService,IrlOrderDetailInterface $irlOrderDetailService,IrlPdfInterface $irlPdfService)
 
     {
 
@@ -32,57 +34,89 @@ class OrderController extends Controller
 
         $this->irlOrderDetailService = $irlOrderDetailService;
 
-
-
+        $this->irlPdfService = $irlPdfService;
+  
     }
 
     public function storeOrder(Request $request)
 
     {
 
-        
+        try
+        {
 
-        try{
+            $message = $this->irlOrderDetailService->saveOrderDetail($request);
+
+            $reference_no = $this->irlOrderDetailService->getReferenceNo();
+            
+            Log::info
+            (
+                "reference log:", 
+
+                [
+
+                'reference_no' => $request->input('reference_no'),
+
+                'SKU_no' => $request->input('SKU_no'),
+
+                'has_pdf' => $request->hasFile('pdf')
+
+                ]
+
+            );
 
 
+            ob_clean();
 
-        $message = $this->irlOrderDetailService->saveOrderDetail($request);
+            Log::info
+            (
+                "reference failes2:",
 
-        $reference_no = $this->irlOrderDetailService->getReferenceNo();
-        
+                [
 
-Log::info("reference log:", [
-    'reference_no' => $request->input('reference_no'),
-    'SKU_no' => $request->input('SKU_no'),
-    'has_pdf' => $request->hasFile('pdf')
-]);
+                    'reference_no'=>$reference_no
 
+                ]
 
-        ob_clean();
+            );
 
-                Log::info("reference failes2:",['reference_no'=>$reference_no]);
+            return response()->json
+            (
 
-        return response()->json(
+                [
 
-            [
+                    'message' => $message,
 
-                'message' => $message,
+                    'reference_no'=>$reference_no,
 
-                'reference_no'=>$reference_no,
+                ]
 
-            ]
+                , 200
 
-            , 200);
+            );
 
         }
 
-        catch(Exception $e){
+        catch(Exception $e)
+        {
 
-            Log::error('Error sending data to API', ['message' => $e->getMessage()]);
+            Log::error
+            (
 
+                'Error sending data to API', 
 
+                [
 
-            return response()->json([
+                    'message' => $e->getMessage()
+
+                ]
+
+            );
+
+            return response()->json
+            (
+
+                [
 
                 'message' => 'An error occurred while sending data.',
 
@@ -90,269 +124,287 @@ Log::info("reference log:", [
 
                 'error' => $e->getMessage(),
 
-            ], 500);
+                ]
+
+                ,500
+
+            );
 
         }
 
     }
-function PDFTemp(Request $request){
-    try {
-    $order_no = $request->input('order_no');
-    $pdfs   = $request->file('pdf');
 
-    $responses = [];
 
-    // Determine if it's a bulk array or a single file upload
-    if (is_array($order_no)) {
-        $count = count($order_no);
+    public function savePDF(Request $request)
+    {
 
-        for ($i = 0; $i < $count; $i++) {
-            $order_nos = $request->input("order_no.$i");
-            $pdfs         = $request->file("pdf.$i");
+    try 
+    {
 
-            Log::info("📦 Processing item #$i", [
-                'order_no' => $order_nos,
-                'has_pdf'      => $pdfs !== null,
-            ]);
+        $referenceNos = $request->input('reference_no')??"";
 
-            if (!$order_nos || !$pdfs) {
-                Log::warning("⚠️ Missing data for item #$i. Skipping.");
-                continue;
+        $skuNos       = $request->input('SKU_no')??"";
+
+        $pdfs         = $request->file('pdf');
+
+        $order_ids  = $request->input('order_id')??"";
+
+        // Determine if it's a bulk array or a single file upload
+        if (is_array($pdfs)) 
+        {
+
+            $count = count($pdfs);
+
+            for ($i = 0; $i < $count; $i++) 
+            {
+
+                $referenceNo = $request->input("reference_no.$i")??"";
+
+                $skuNo       = $request->input("SKU_no.$i")??"";
+
+                $pdf         = $request->file("pdf.$i");
+
+                $order_id   = $request->order_id??"";
+
+
+                Log::info
+                (
+                    "📦 Processing item #$i", 
+                    [
+
+                    'reference_no' => $referenceNo??"",
+
+                    'sku_no'       => $skuNo??"",
+
+                    'has_pdf'      => $pdf !== null,
+
+                    ]
+                );
+
+                if (!$pdf) 
+                {
+
+                    Log::warning("⚠️ Missing data for item #$i. Skipping.");
+
+                    continue;
+
+                }
+
+                $url = $this->irlPdfService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
+
+                $order_id = $this->irlPdfService->getOrderId();
+
+                $responses[] = 
+                [
+
+                    'order_id' => $order_id,
+
+                    'url' => $url,
+
+                    'message'      => "PDF processed successfully.",
+
+                ];
+
             }
 
-            $url = $this->irlOrderDetailService->savePDFTemp($order_nos, $pdfs);
+        } 
 
-            $responses[] = [
-                'order_no' => $order_nos,
-                'url' => $url,
-            ];
-        }
-    } else {
-        // Handle single item
-        $referenceNo = $request->input('reference_no');
-        $skuNo       = $request->input('SKU_no');
-        $pdf         = $request->file('pdf');
-        $order_id  = $request->input('order_id')??null;
+        return response()->json
+        (
+            [
 
-
-        Log::info("📦 Processing single item", [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'has_pdf'      => $pdf !== null,
-        ]);
-
-        if (!$referenceNo || !$skuNo || !$pdf) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Missing required fields.',
-            ], 422);
-        }
-
-        $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
-
-        $responses[] = [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'message'      => $message,
-        ];
-    }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'PDF(s) processed successfully.',
-        'data' => $responses,
-    ], 200);
-
-} catch (Exception $e) {
-    Log::error('❌ Error processing PDF upload', [
-        'message' => $e->getMessage(),
-    ]);
-
-    return response()->json([
-        'success' => false,
-        'message' => 'Error occurred while processing PDFs.',
-        'error' => $e->getMessage(),
-    ], 500);
-}
- }
-
-public function savePDF(Request $request)
-{
-try {
-    $referenceNos = $request->input('reference_no')??"";
-    $skuNos       = $request->input('SKU_no')??"";
-    $pdfs         = $request->file('pdf');
-    $order_ids  = $request->input('order_id')??"";
-
-    // Determine if it's a bulk array or a single file upload
-    if (is_array($pdfs)) {
-        $count = count($pdfs);
-
-        for ($i = 0; $i < $count; $i++) {
-            $referenceNo = $request->input("reference_no.$i")??"";
-            $skuNo       = $request->input("SKU_no.$i")??"";
-            $pdf         = $request->file("pdf.$i");
-            $order_id   = $request->order_id??"";
-
-
-            Log::info("📦 Processing item #$i", [
-                'reference_no' => $referenceNo??"",
-                'sku_no'       => $skuNo??"",
-                'has_pdf'      => $pdf !== null,
-            ]);
-
-            if (!$pdf) {
-                Log::warning("⚠️ Missing data for item #$i. Skipping.");
-                continue;
-            }
-
-            $url = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
-            $order_id = $this->irlOrderDetailService->getOrderId();
-
-            $responses[] = [
-                'order_id' => $order_id,
-                'url' => $url,
-                'message'      => "PDF processed successfully.",
-            ];
-        }
-    } else {
-        // Handle single item
-        $referenceNo = $request->input('reference_no');
-        $skuNo       = $request->input('SKU_no');
-        $pdf         = $request->file('pdf');
-
-        Log::info("📦 Processing single item", [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'has_pdf'      => $pdf !== null,
-        ]);
-
-        if (!$pdf) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Missing required fields.',
-            ], 422);
-        }
-
-        $message = $this->irlOrderDetailService->savePDF($referenceNo, $skuNo, $pdf);
-
-        $responses[] = [
-            'reference_no' => $referenceNo,
-            'sku_no'       => $skuNo,
-            'message'      => $message,
-        ];
-    }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'PDF(s) processed successfully.',
-        'data' => $responses,
-    ], 200);
-
-} catch (Exception $e) {
-    Log::error('❌ Error processing PDF upload', [
-        'message' => $e->getMessage(),
-    ]);
-
-    return response()->json([
-        'success' => false,
-        'message' => 'Error occurred while processing PDFs.',
-        'error' => $e->getMessage(),
-    ], 500);
-}
-
-}
-
-// App\Services\IRLServices\IrlOrderDetailService.php
-
-// App\Http\Controllers\OrderController.php
-
-public function deleteOrderDetail(Request $request)
-{
-    try {
-        $message = $this->irlOrderDetailService->deselectOrderDetail($request);
-
-        return response()->json([
             'success' => true,
-            'message' => $message,
-        ]);
-    } catch (\Exception $e) {
-        Log::error('❌ Error in deleteOrderDetail', [
-            'error' => $e->getMessage(),
-        ]);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'An error occurred while deselecting order detail.',
-        ], 500);
-    }
-}
+            'message' => 'PDF(s) processed successfully.',
 
+            'data' => $responses,
 
+            ]
+            , 200
+        );
 
-public function storeBulkOrder(Request $request)
-{
-    try {
-        $payload = $request->all();
+    } 
+    catch (Exception $e) 
+    {
 
-                if (isset($payload['SKU_no'])) {
+        Log::error
 
-            $payload = [$payload];
-        }
-            Log::info("reference log:",['payload' => $payload]);
-        $results = [];
+        (
 
-        foreach ($payload as $skuData) {
-            // 🔁 Create a new Request instance with current item’s data
-            $skuRequest = new Request($skuData);
-            Log::info("reference log:",['skuRequest' => $skuRequest]);
-            // 🧠 Reuse existing saveOrderDetail logic
-            $message = $this->irlOrderDetailService->saveOrderDetail($skuRequest);
-            $reference_no = $this->irlOrderDetailService->getReferenceNo();
-
-            $results[] = [
-                'SKU_no' => $skuData['SKU_no'],
-                'reference_no' => $reference_no,
-                'message' => $message
-            ];
-        }
-
-        return response()->json([
-            'message' => 'Bulk SKU processing completed.',
-            'data' => $results,
-        ], 200);
-    } catch (Exception $e) {
-        Log::error('Bulk order processing failed', ['error' => $e->getMessage()]);
-
-        return response()->json([
-            'message' => 'Bulk processing error',
-            'success' => false,
-            'error' => $e->getMessage(),
-        ], 500);
-    }
-
-    }
-    function storeOrderTest(Request $request){
-        return response()->json(
+            '❌ Error processing PDF upload', 
 
             [
 
-                'message' => 'Order created successfully!',
-                'reference_no'=>'20302139002',
+            'message' => $e->getMessage(),
 
             ]
 
-            , 200);
+        );
 
-        }
+        return response()->json
+        
+        (
+            
+            [
+
+            'success' => false,
+
+            'message' => 'Error occurred while processing PDFs.',
+
+            'error' => $e->getMessage(),
+
+            ]
+        
+            , 500
     
-    public function publishOrder(Request $request)
+        );
+    }
+
+}
+
+
+    public function deleteOrderDetail(Request $request)
 
     {
 
-        $reference_no = $request->reference_no;
+        try 
+        
+        {
 
-        return response()->json(['message' => $this->irlQrService->publishOrder($reference_no)], 200);
+            $message = $this->irlOrderDetailService->deselectOrderDetail($request);
+
+            return response()->json
+            (
+
+                [
+
+                'success' => true,
+
+                'message' => $message,
+
+                ]
+
+            );
+
+        }
+        
+        catch (\Exception $e) 
+        
+        {
+
+            Log::error
+            (
+                '❌ Error in deleteOrderDetail', 
+
+                [
+
+                'error' => $e->getMessage(),
+
+                ]);
+
+            return response()->json
+
+            (
+
+                [
+
+                'success' => false,
+
+                'message' => 'An error occurred while deselecting order detail.',
+
+                ]
+
+                , 500
+
+            );
+
+        }
 
     }
-}
+
+
+    public function storeBulkOrder(Request $request)
+    {
+
+        try {
+
+                $payload = $request->all();
+
+                if (isset($payload['SKU_no'])) 
+                {
+
+                    $payload = [$payload];
+
+                }
+
+                Log::info("reference log:",['payload' => $payload]);
+
+                $results = [];
+
+                foreach ($payload as $skuData) 
+                {
+
+                    // 🔁 Create a new Request instance with current item’s data
+                    $skuRequest = new Request($skuData);
+
+                    Log::info("reference log:",['skuRequest' => $skuRequest]);
+
+                    // 🧠 Reuse existing saveOrderDetail logic
+                    $message = $this->irlOrderDetailService->saveOrderDetail($skuRequest);
+
+                    $reference_no = $this->irlOrderDetailService->getReferenceNo();
+
+                    $results[] = 
+                    [
+
+                        'SKU_no' => $skuData['SKU_no'],
+
+                        'reference_no' => $reference_no,
+
+                        'message' => $message
+
+                    ];
+
+                }
+
+                return response()->json
+                (
+                    [
+
+                    'message' => 'Bulk SKU processing completed.',
+
+                    'data' => $results,
+
+                    ]
+
+                    , 200
+
+                );
+
+        }
+        catch (Exception $e) 
+        {
+
+            Log::error('Bulk order processing failed', ['error' => $e->getMessage()]);
+
+            return response()->json
+            (
+                [
+
+                'message' => 'Bulk processing error',
+
+                'success' => false,
+
+                'error' => $e->getMessage(),
+
+                ]
+
+                , 500
+                
+            );
+
+        }
+
+        }
+
+    }

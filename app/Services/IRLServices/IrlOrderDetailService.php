@@ -26,34 +26,56 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     protected $reference_no="";
 
     protected $email="";
+
     protected $SKU_no="";
-    protected $order_id="";
 
-    
+    public function saveOrderDetail($request)
 
-public function saveOrderDetail($request)
     {
 
         // Check if this is an update to existing SKU
-        if ($request->filled('reference_no')) {
+        if ($request->filled('reference_no')) 
+
+        {
             $order = IrlReport::where('SKU_no', $request->SKU_no)
                             ->where('reference_no', $request->reference_no)
                             ->first();
-            if(!$order){
+
+            if(!$order)
+
+            {
+
                 throw new \Exception("Reference Number for SKU Number: " . $request->SKU_no . " doesn't match.");
+
             }
 
-        } else {
-            $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
         }
+
+        else 
+
+        {
+
+            $order = IrlReport::where('SKU_no', $request->SKU_no)->first();
+
+        }
+
         // If not found, create a new instance
-        if (!$order) {
+        if (!$order) 
+
+        {
+
             Log::info("order fail:",['order'=>$order]);
+
             $order = new IrlReport();
+
             $order->SKU_no = $request->SKU_no;
+
             $order->reference_no = IrlReport::getNextReferenceNo();
+
             $this->reference_no = $order->reference_no;
+
             $this->SKU_no = $request->SKU_no;
+
         }
 
         // Case 1: Only SKU_no received (initial creation)
@@ -61,13 +83,22 @@ public function saveOrderDetail($request)
             !$request->name &&
             !$request->email  &&
             !$request->created_by && !$request->order_id
-        ) {
+            ) 
+
+        {
+
             Log::info("sku only order:",['order'=>$order]);
+
             $order->status = IrlReport::PUBLISHED;
+
             $order->created_at = $order->created_at??now();
+
             $this->reference_no = $order->reference_no;
+
             $order->save();
+
             return "SKU stored successfully.";
+
         }
 
         // Case 2: Full data received — must validate ALL required fields
@@ -75,85 +106,80 @@ public function saveOrderDetail($request)
             $request->name &&
             $request->email &&
             $request->created_by && $request->order_id
-        ) {
+            ) 
+
+        {
+
             Log::info("whole data order:",['order'=>$order]);
+
             $order->name       = $request->name;
+
             $order->phone      = $request->phone;
+
             $order->email      = $request->email;
+
             $order->order_id    = $request->order_id;
+
             $order->status = IrlReport::PUBLISHED;
+
             $this->email = $request->email;
+            
             $this->reference_no = $request->reference_no??$order->reference_no;
+
             $order->created_by = $request->created_by;
-            // $order->status     = IrlReport::PUBLISHED;
+
             $order->created_at = now();
+
             $order->save();
+
             return "Order saved successfully.";
+
         }
 
         // Case 3: Partial data — reject
         return "Incomplete data. Please send all of name, phone, email, and created_by together.";
+
     }
 
-    
-public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf,string $order_id)
-{
-  // Step 1: Match SKU and reference_no in DB
-    $record = IrlReport::where('SKU_no', $skuNo)
-                ->where('reference_no', $referenceNo)
-                ->first();
-        $this->order_id = $record->order_id??$order_id??"";
-    if (!$record) {
-        return $this->savePDFTemp($order_id,$pdf);;
-    }
 
-    // Step 2: Store PDF
-    try {
-        $filename = (string) Str::uuid() . '_' . $referenceNo . '.' . $pdf->getClientOriginalExtension();
-        $pdf->storeAs('report', $filename,'public'); // You can also specify disk: ->storeAs('report', $filename, 'public')
+    public function deselectOrderDetail($request)
 
-        // Step 3: Save PDF path in DB
-        $record->pdf_url = $filename;
+    {
+
+        $skuNo   = $request->input('SKU_no');
+
+        $irlNo   = $request->input('reference_no');
+
+        $orderId = $request->input('order_id');
+
+        $record = IrlReport::where('SKU_no', $skuNo)
+            ->where('reference_no', $irlNo)
+            ->where('order_id', $orderId)
+            ->first();
+
+        if (!$record) 
+        {
+
+            return 'No matching record found.';
+
+        }
+
+        $record->order_id   = null;
+
+        $record->name       = null;
+
+        $record->phone      = null;
+
+        $record->email      = null;
+
+        $record->created_by = null;
 
         $record->save();
-     $url = Storage::disk('public')->url('report/' . $filename);
-        return $url;
-    } catch (\Exception $ex) {
-        Log::error('PDF Upload Error', [
-            'reference_no' => $referenceNo,
-            'SKU_no'       => $skuNo,
-            'error'        => $ex->getMessage()
-        ]);
-        return '❌ Something went wrong while uploading the PDF.';
-    }
-}
 
-// App\Services\IRLServices\IrlOrderDetailService.php
+        return 'Fields deselected successfully.';
 
-public function deselectOrderDetail($request)
-{
-    $skuNo   = $request->input('SKU_no');
-    $irlNo   = $request->input('reference_no');
-    $orderId = $request->input('order_id');
-
-    $record = IrlReport::where('SKU_no', $skuNo)
-        ->where('reference_no', $irlNo)
-        ->where('order_id', $orderId)
-        ->first();
-
-    if (!$record) {
-        return 'No matching record found.';
     }
 
-    $record->order_id   = null;
-    $record->name       = null;
-    $record->phone      = null;
-    $record->email      = null;
-    $record->created_by = null;
-    $record->save();
-
-    return 'Fields deselected successfully.';
-}
 
     public function getReferenceNo()
 
@@ -163,37 +189,24 @@ public function deselectOrderDetail($request)
 
     }
 
-    public function getSkuNo(){
+    public function getSkuNo()
+
+    {
+
         return $this->SKU_no;
+
     }
-function savePDFTemp($order_no,$pdf){
-    $url = "";
-    // Step 2: Store PDF
-    try {
-        $filename = (string) Str::uuid() . '.' . $pdf->getClientOriginalExtension();
-
-        $pdf->storeAs('report', $filename,'public'); // You can also specify disk: ->storeAs('report', $filename, 'public')
-        $url = Storage::disk('public')->url('report/' . $filename);
 
 
-        return $url;
-    } catch (\Exception $ex) {
-        Log::error('PDF Upload Error', [
-            'url' => $url,
-            'error'        => $ex->getMessage()
-        ]);
-        return '❌ Something went wrong while uploading the PDF.';
+    function getEmail(){
+
+        return $this->email;
+
     }
-}
-function getOrderId(){
-    return $this->order_id;
-}
-function getEmail(){
-    return $this->email;
-}
+
 }
 
 
 
 
-?>
+    ?>
