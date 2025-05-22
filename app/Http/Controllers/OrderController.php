@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 
-use App\Services\IRLInterfaces\IrlOrderDetailInterface;
+use App\Interfaces\IRLInterfaces\IrlOrderDetailInterface;
 
-use App\Services\IRLInterfaces\IrlPdfInterface;
+use App\Interfaces\IRLInterfaces\IrlPdfInterface;
 
 use Illuminate\Http\Request;
 
-use App\Services\IRLInterfaces\IrlQrInterface;
+use App\Interfaces\IRLInterfaces\IrlQrInterface;
 
 use Illuminate\Support\Facades\Log;
 
