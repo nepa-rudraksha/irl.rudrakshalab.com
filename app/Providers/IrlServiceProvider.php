@@ -4,18 +4,18 @@
 
 namespace App\Providers;
 
-
-
-use App\Services\IRLInterfaces\IrlOrderDetailInterface;
-use App\Services\IRLInterfaces\IrlPdfInterface;
+use App\Interfaces\IRLInterfaces\IrlReportRepositoryInterface;
+use App\Interfaces\IRLInterfaces\IrlOrderDetailInterface;
+use App\Interfaces\IRLInterfaces\IrlPdfInterface;
 use App\Services\IRLServices\IrlQrService;
 
 use Illuminate\Support\ServiceProvider;
 
-use App\Services\IRLInterfaces\IrlQrInterface;
+use App\Interfaces\IRLInterfaces\IrlQrInterface;
 
 use App\Services\IRLServices\IrlOrderDetailService;
 use App\Services\IRLServices\IrlPdfService;
+use App\Repositories\IrlReportRepository;
 
 class IrlServiceProvider extends ServiceProvider
 
@@ -30,6 +30,8 @@ class IrlServiceProvider extends ServiceProvider
         $this->app->singleton(IrlOrderDetailInterface::class, IrlOrderDetailService::class);
 
         $this->app->singleton(IrlPdfInterface::class, IrlPdfService::class);
+
+        $this->app->singleton(IrlReportRepositoryInterface::class, IrlReportRepository::class);
 
         
 

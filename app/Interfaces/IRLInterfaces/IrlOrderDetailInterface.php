@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\IRLInterfaces;
+namespace App\Interfaces\IRLInterfaces;
 use Illuminate\Http\UploadedFile;
 
 interface IrlOrderDetailInterface{

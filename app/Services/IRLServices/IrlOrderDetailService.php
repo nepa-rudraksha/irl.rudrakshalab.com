@@ -4,19 +4,9 @@ namespace App\Services\IRLServices;
 
 use App\Models\IrlReport;
 
-use Carbon\Carbon;
-
-use App\Services\IRLInterfaces\IrlOrderDetailInterface;
-
-use Illuminate\Support\Facades\Crypt;
-
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Interfaces\IRLInterfaces\IrlOrderDetailInterface;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Livewire\WithFileUploads;
-use Illuminate\Http\UploadedFile;
 
 
 class IrlOrderDetailService implements IrlOrderDetailInterface

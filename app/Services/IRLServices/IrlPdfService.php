@@ -1,10 +1,9 @@
 <?php
 namespace App\Services\IRLServices;
 
+use App\Interfaces\IRLInterfaces\IrlReportRepositoryInterface;
 
-use App\Services\IRLInterfaces\IrlPdfInterface;
-
-use App\Models\IrlReport;
+use App\Interfaces\IRLInterfaces\IrlPdfInterface;
 
 use Illuminate\Support\Facades\Log;
 
@@ -18,14 +17,18 @@ class IrlPdfService implements IrlPdfInterface
 {
 
     protected $order_id="";
+    protected IrlReportRepositoryInterface $irlReportRepositoryService;
+
+    public function __construct(IrlReportRepositoryInterface $irlReportRepositoryService)
+    {
+        $this->irlReportRepositoryService = $irlReportRepositoryService;
+    }
 
     public function savePDF(string $referenceNo, string $skuNo, UploadedFile $pdf,string $order_id)
     {
 
     // Step 1: Match SKU and reference_no in DB
-        $record = IrlReport::where('SKU_no', $skuNo)
-                    ->where('reference_no', $referenceNo)
-                    ->first();
+        $record = $this->irlReportRepositoryService->findBySkuAndReference($skuNo,$referenceNo);
 
         $this->order_id = $record->order_id??$order_id??"";
 
