@@ -91,16 +91,14 @@ class OrderController extends Controller
 
                 }
 
-                $url = $this->irlPdfService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
-
-                $order_id = $this->irlPdfService->getOrderId();
+                $MetaData = $this->irlPdfService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
 
                 $responses[] = 
                 [
 
-                    'order_id' => $order_id,
+                    'order_id' => $MetaData['order_id'],
 
-                    'url' => $url,
+                    'url' => $MetaData['url'],
 
                     'message'      => "PDF processed successfully.",
 
