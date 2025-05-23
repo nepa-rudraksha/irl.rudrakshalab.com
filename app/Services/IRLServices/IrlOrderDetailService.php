@@ -142,14 +142,47 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     public function deselectOrderDetail($request)
 
     {
-
+        try{
         $skuNo   = $request->input('SKU_no');
 
         $irlNo   = $request->input('reference_no');
 
         $orderId = $request->input('order_id');
 
-        return $this->deselectOrderService->DeselectOrder($skuNo,$irlNo,$orderId);
+        $message = $this->deselectOrderService->DeselectOrder($skuNo,$irlNo,$orderId);
+        return [
+            'status' => 200,
+            'message' => $message,
+            'success' => true,
+            
+        ];
+        }
+            catch (\Exception $e) 
+        
+        {
+
+            Log::error
+            (
+                '❌ Error in deleteOrderDetail', 
+
+                [
+
+                'error' => $e->getMessage(),
+
+                ]);
+
+            return 
+
+                [
+                'status' => 500,
+
+                'success' => false,
+
+                'message' => 'An error occurred while deselecting order detail.',
+
+                ];
+
+        }
     }
 
 
