@@ -61,60 +61,25 @@ class OrderController extends Controller
 
     {
 
-        try 
-        
-        {
-
-            $message = $this->irlOrderDetailService->deselectOrderDetail($request);
+            $MetaData = $this->irlOrderDetailService->deselectOrderDetail($request);
 
             return response()->json
             (
 
                 [
 
-                'success' => true,
+                'success' => $MetaData['success'],
 
-                'message' => $message,
+                'message' => $MetaData['message'],
 
                 ]
+                , $MetaData['status']
 
             );
 
         }
         
-        catch (\Exception $e) 
-        
-        {
 
-            Log::error
-            (
-                '❌ Error in deleteOrderDetail', 
-
-                [
-
-                'error' => $e->getMessage(),
-
-                ]);
-
-            return response()->json
-
-            (
-
-                [
-
-                'success' => false,
-
-                'message' => 'An error occurred while deselecting order detail.',
-
-                ]
-
-                , 500
-
-            );
-
-        }
-
-    }
 
 
     public function storeBulkOrder(Request $request)
