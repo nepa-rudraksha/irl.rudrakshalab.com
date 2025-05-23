@@ -5,7 +5,7 @@ namespace App\Services\IRLServices;
 use App\Models\IrlReport;
 
 use App\Interfaces\IRLInterfaces\IrlOrderDetailInterface;
-
+use App\Interfaces\IRLInterfaces\IrlReportRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 
@@ -18,6 +18,13 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
     protected $email="";
 
     protected $SKU_no="";
+
+    protected IrlReportRepositoryInterface $deselectOrderService;
+
+    public function __construct(IrlReportRepositoryInterface $deselectOrderService)
+    {
+        $this->deselectOrderService = $deselectOrderService;
+    }
 
     public function saveOrderDetail($request)
 
@@ -142,32 +149,7 @@ class IrlOrderDetailService implements IrlOrderDetailInterface
 
         $orderId = $request->input('order_id');
 
-        $record = IrlReport::where('SKU_no', $skuNo)
-            ->where('reference_no', $irlNo)
-            ->where('order_id', $orderId)
-            ->first();
-
-        if (!$record) 
-        {
-
-            return 'No matching record found.';
-
-        }
-
-        $record->order_id   = null;
-
-        $record->name       = null;
-
-        $record->phone      = null;
-
-        $record->email      = null;
-
-        $record->created_by = null;
-
-        $record->save();
-
-        return 'Fields deselected successfully.';
-
+        return $this->deselectOrderService->DeselectOrder($skuNo,$irlNo,$orderId);
     }
 
 
