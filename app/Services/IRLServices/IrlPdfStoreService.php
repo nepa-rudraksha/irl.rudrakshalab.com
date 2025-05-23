@@ -51,7 +51,9 @@ class IrlPdfStoreService implements IrlPdfStoreServiceInterface{
           $filename = (string) Str::uuid() . '.' . $pdf->getClientOriginalExtension();
           $pdf->storeAs('report', $filename,'public'); 
           $url = Storage::disk('public')->url('report/' . $filename);
-          return $url;
+          return [
+            'url' => $url,
+          ];
         }
         catch (\Exception $ex) 
         {

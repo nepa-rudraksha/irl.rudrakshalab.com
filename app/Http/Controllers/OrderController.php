@@ -38,127 +38,22 @@ class OrderController extends Controller
     }
     public function savePDF(Request $request)
     {
-
-    try 
-    {
-
-        $referenceNos = $request->input('reference_no')??"";
-
-        $skuNos       = $request->input('SKU_no')??"";
-
-        $pdfs         = $request->file('pdf');
-
-        $order_ids  = $request->input('order_id')??"";
-
-        // Determine if it's a bulk array or a single file upload
-        if (is_array($pdfs)) 
-        {
-
-            $count = count($pdfs);
-
-            for ($i = 0; $i < $count; $i++) 
-            {
-
-                $referenceNo = $request->input("reference_no.$i")??"";
-
-                $skuNo       = $request->input("SKU_no.$i")??"";
-
-                $pdf         = $request->file("pdf.$i");
-
-                $order_id   = $request->order_id??"";
-
-
-                Log::info
-                (
-                    "📦 Processing item #$i", 
-                    [
-
-                    'reference_no' => $referenceNo??"",
-
-                    'sku_no'       => $skuNo??"",
-
-                    'has_pdf'      => $pdf !== null,
-
-                    ]
-                );
-
-                if (!$pdf) 
-                {
-
-                    Log::warning("⚠️ Missing data for item #$i. Skipping.");
-
-                    continue;
-
-                }
-
-                $MetaData = $this->irlPdfService->savePDF($referenceNo, $skuNo, $pdf,$order_id);
-
-                $responses[] = 
-                [
-
-                    'order_id' => $MetaData['order_id'],
-
-                    'url' => $MetaData['url'],
-
-                    'message'      => "PDF processed successfully.",
-
-                ];
-
-            }
-
-        } 
-
+        $Metadata = $this->irlPdfService->savePDF($request);
         return response()->json
         (
             [
 
-            'success' => true,
+            'success' => $Metadata['sign'],
 
-            'message' => 'PDF(s) processed successfully.',
+            'message' => $Metadata['message'],
 
-            'data' => $responses,
-
-            ]
-            , 200
-        );
-
-    } 
-    catch (Exception $e) 
-    {
-
-        Log::error
-
-        (
-
-            '❌ Error processing PDF upload', 
-
-            [
-
-            'message' => $e->getMessage(),
+            'data' => $Metadata['responses'],
 
             ]
-
+            , $Metadata['status']
         );
 
-        return response()->json
-        
-        (
-            
-            [
-
-            'success' => false,
-
-            'message' => 'Error occurred while processing PDFs.',
-
-            'error' => $e->getMessage(),
-
-            ]
-        
-            , 500
-    
-        );
-    }
-
+   
 }
 
 
